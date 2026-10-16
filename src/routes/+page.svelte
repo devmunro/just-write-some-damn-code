@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { invoke } from '@tauri-apps/api/core';
-  import { BookOpen, Bot, Braces, Check, CheckCircle2, ChevronDown, Circle, Code2, Container, Dices, ExternalLink, FileCode2, History, LibraryBig, ListFilter, Loader2, MessageSquareText, PanelLeftClose, PanelLeftOpen, Play, Search, Settings2, Sparkles, Terminal, X } from '@lucide/svelte';
+  import { BookOpen, Bot, Braces, Check, CheckCircle2, ChevronDown, Circle, Code2, Container, Dices, FileCode2, History, ListFilter, Loader2, MessageSquareText, PanelLeftClose, PanelLeftOpen, Play, Search, Settings2, Sparkles, Terminal, X } from '@lucide/svelte';
   import CodeEditor from '$lib/components/CodeEditor.svelte';
   import HistoryDrawer from '$lib/components/HistoryDrawer.svelte';
   import SettingsDrawer from '$lib/components/SettingsDrawer.svelte';
@@ -298,10 +298,6 @@
       </div>
     </div>
     <div class="topbar-actions">
-      <details class="study-collections">
-        <summary class="quiet-button" aria-label="Open external study maps"><LibraryBig size={16} /><span>Study maps</span></summary>
-        <div class="study-collections-popover"><strong>External practice collections</strong><a href="https://neetcode.io/practice/practice/neetcode250" target="_blank" rel="noreferrer">NeetCode 250 <ExternalLink size={13} /></a><a href="https://leetcode.com/studyplan/top-interview-150/" target="_blank" rel="noreferrer">LeetCode Top Interview 150 <ExternalLink size={13} /></a></div>
-      </details>
       <button class="quiet-button" on:click={openHistory} aria-label="Open saved history"><History size={16} /><span>History</span></button>
       <button class="quiet-button" on:click={() => (showSettings = true)} aria-label="Open settings"><Settings2 size={16} /><span>Settings</span></button>
     </div>
@@ -410,7 +406,7 @@
             {#if result.stderr}<pre class="runner-stderr">{result.stderr}</pre>{/if}
           </div>
         {:else if !sandbox.imageAvailable}
-          <div class="runner-not-ready"><div class="runner-not-ready-icon"><Container size={18} /></div><div class="runner-not-ready-copy"><div class="runner-not-ready-heading"><strong>{sandbox.engine ? 'One-time setup' : 'No container engine found'}</strong><div class="runner-actions">
+          <div class="runner-not-ready"><div class="runner-not-ready-icon"><Container size={16} /></div><div class="runner-not-ready-copy"><div class="runner-not-ready-heading"><strong>{sandbox.engine ? 'One-time setup' : 'No container engine found'}</strong><div class="runner-actions">
             {#if sandbox.engine}<button class="setup-button" disabled={isSettingUp} on:click={setupSandbox}>{#if isSettingUp}<Loader2 class="spin" size={14} />{:else}<span class="download-glyph">↓</span>{/if}{isSettingUp ? 'Setting up' : 'Set up runner'}</button>{/if}
             <button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button>
           </div></div><p>{#if sandbox.engine}Build the local runner image. Network access is needed once.{:else}Install <a href="https://podman.io/docs/installation" target="_blank" rel="noreferrer">Podman</a> or <a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noreferrer">Docker</a> to run examples.{/if}</p></div>
