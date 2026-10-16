@@ -37,6 +37,7 @@
   let selectedExercise: Exercise | null = DSA_EXERCISES[0] ?? null;
   let generatedVariant: GeneratedVariant | null = null;
   let editorLanguage: PracticeLanguage = 'python';
+  let editorTypography = { fontSize: 15, lineHeight: 24 };
   let preferences = emptyPreferences;
   let progress: Record<string, ExerciseStatus> = {};
   let submission = '';
@@ -373,8 +374,8 @@
       </div>
 
       <div class="editor-surface" role="region" aria-label="Code space">
-        <CodeEditor bind:value={submission} language={editorLanguage} preferences={currentPreferences} on:input={(event) => handleEditorInput((event as CustomEvent<string>).detail)} />
-        {#if !submission}<div class="editor-placeholder"><span>1</span><span>Code space — write the code. Figure it out as you go.</span></div>{/if}
+        <CodeEditor bind:value={submission} language={editorLanguage} preferences={currentPreferences} on:input={(event) => handleEditorInput((event as CustomEvent<string>).detail)} on:typography={(event) => (editorTypography = event.detail)} />
+        {#if !submission}<div class="editor-placeholder" style={`--editor-font-size: ${editorTypography.fontSize}px; --editor-line-height: ${editorTypography.lineHeight}px`}><span>1</span><span>Code space — write the code. Figure it out as you go.</span></div>{/if}
       </div>
 
       {#if error}<div class="message-banner error-banner"><X size={15} /><span>{error}</span><button on:click={() => (error = '')} aria-label="Dismiss error"><X size={13} /></button></div>{/if}

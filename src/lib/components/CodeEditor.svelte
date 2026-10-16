@@ -13,7 +13,10 @@
   export let value: string;
   export let language: EditorLanguage;
   export let preferences: EditorPreferences = { autoIndent: true, autoCloseBrackets: true, autoCloseQuotes: true };
-  const dispatch = createEventDispatcher<{ input: string }>();
+  const dispatch = createEventDispatcher<{
+    input: string;
+    typography: { fontSize: number; lineHeight: number };
+  }>();
 
   let container: HTMLDivElement;
   let editor: Monaco.editor.IStandaloneCodeEditor | null = null;
@@ -69,9 +72,33 @@
       autoClosingBrackets: preferences.autoCloseBrackets ? 'languageDefined' : 'never',
       autoClosingQuotes: preferences.autoCloseQuotes ? 'languageDefined' : 'never'
     });
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {});
+    const codeEditor = editor;
+    const fontSizeOption = monaco.editor.EditorOption.fontSize;
+    const lineHeightOption = monaco.editor.EditorOption.lineHeight;
+    const reportTypography = () => {
+      dispatch('typography', {
+        fontSize: codeEditor.getOption(fontSizeOption),
+        lineHeight: codeEditor.getOption(lineHeightOption)
+      });
+    };
 
-    editor.onDidChangeModelContent(() => {
+    codeEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {});
+    codeEditor.onDidChangeConfiguration((event) => {
+      if (event.hasChanged(fontSizeOption)) {
+        const fontSize = codeEditor.getOption(fontSizeOption);
+        const matchingLineHeight = Math.round(fontSize * 1.6);
+        if (codeEditor.getOption(lineHeightOption) !== matchingLineHeight) {
+          codeEditor.updateOptions({ lineHeight: matchingLineHeight });
+        }
+      }
+
+      if (event.hasChanged(fontSizeOption) || event.hasChanged(lineHeightOption)) {
+        reportTypography();
+      }
+    });
+    reportTypography();
+
+    codeEditor.onDidChangeModelContent(() => {
       value = editor?.getValue() ?? '';
       dispatch('input', value);
     });
