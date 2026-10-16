@@ -140,29 +140,29 @@ export const DSA_EXERCISES: Exercise[] = scenarios.map(({ blueprint, context, va
   };
 });
 
-const buildBriefs: Array<[string, string, JsonValue, JsonValue, JsonValue, JsonValue, string[]]> = [
-  ['Query string reader','Parse a URL query string into an object. Decode percent escapes, use the last value for repeated keys, and treat a key without `=` as an empty string.',{query:'?name=Jo%20Lee&mode=fast&mode=safe&flag'}, {name:'Jo Lee',mode:'safe',flag:''},{query:'?x=1&x=2'}, {x:'2'}, ['parsing','strings']],
-  ['CSV row summarizer','Parse a CSV document with a header row and return an array of objects. Support quoted commas and escaped double quotes.',{csv:'name,count\nAda,2\n"Lin, Jr",3'},[{name:'Ada',count:'2'},{name:'Lin, Jr',count:'3'}],{csv:'name,city\nA,"New York"'},[{name:'A',city:'New York'}],['parsing','state machines']],
-  ['Access log report','Group log entries by status code and return counts sorted by numeric status code.',{lines:['GET / 200','POST /items 201','GET /missing 404','GET / 200']},[{status:200,count:2},{status:201,count:1},{status:404,count:1}],{lines:[]},[],['strings','maps']],
-  ['Invoice total','Return subtotal, tax, and total in cents. Apply the supplied integer tax rate in basis points and round tax to the nearest cent.',{items:[{priceCents:199,quantity:2},{priceCents:250,quantity:1}],taxBps:800},{subtotalCents:648,taxCents:52,totalCents:700},{items:[],taxBps:0},{subtotalCents:0,taxCents:0,totalCents:0},['arithmetic','rounding']],
-  ['Markdown heading index','Extract Markdown headings and return their depth, text, and one-based line number.',{markdown:'# Intro\nText\n## Details\n### Edge cases'},[{level:1,text:'Intro',line:1},{level:2,text:'Details',line:3},{level:3,text:'Edge cases',line:4}],{markdown:'plain text'},[],['parsing','regular expressions']],
-  ['Inventory reducer','Apply add and remove events to item quantities. Ignore removals that would make a quantity negative; return item keys alphabetically.',{events:[{op:'add',item:'pen',quantity:4},{op:'remove',item:'pen',quantity:2},{op:'remove',item:'pen',quantity:5}]},{pen:2},{events:[{op:'add',item:'book',quantity:1}]},{book:1},['maps','state']],
-  ['Time range formatter','Merge overlapping time ranges and return compact strings in HH:MM-HH:MM format.',{ranges:[[540,600],[590,660],[720,780]]},['09:00-11:00','12:00-13:00'],{ranges:[]},[],['intervals','formatting']],
-  ['Color contrast helper','Convert two six-digit hex colors to relative luminance and return the contrast ratio rounded to two decimals.',{foreground:'#000000',background:'#ffffff'},{ratio:21},{foreground:'#ffffff',background:'#ffffff'},{ratio:1},['number conversion','geometry']],
-  ['JSON patch applier','Apply a list of set and remove operations to a JSON object using dot-separated paths. Return the updated object.',{value:{profile:{name:'Ari',active:true}},operations:[{op:'set',path:'profile.name',value:'Rae'},{op:'remove',path:'profile.active'}]},{profile:{name:'Rae'}},{value:{a:1},operations:[{op:'set',path:'b',value:2}]},{a:1,b:2},['objects','mutation']],
-  ['Command option parser','Parse command tokens into an options object. Support --key value, --flag, and --no-flag forms.',{tokens:['--port','8080','--watch','--no-cache']},{port:'8080',watch:true,cache:false},{tokens:['--name','Ada']},{name:'Ada'},['parsing','state']],
-  ['Search result ranker','Score documents by how many query terms appear in their title, then return IDs by descending score and ascending ID.',{query:'blue bird',documents:[{id:'b',title:'Blue bird guide'},{id:'a',title:'Bird notes'},{id:'c',title:'Blue sky'}]},['b','a','c'],{query:'x',documents:[{id:'z',title:'None'}]},['z'],['text search','sorting']],
-  ['Diff summary','Compare two arrays of strings and return added and removed values in original input order.',{before:['a','b','c'],after:['b','c','d']},{added:['d'],removed:['a']},{before:[],after:['new']},{added:['new'],removed:[]},['sets','arrays']]
+const buildBriefs: Array<[string, string, JsonValue, JsonValue, JsonValue, JsonValue, string[], Difficulty]> = [
+  ['Query string reader','Parse a URL query string into an object. Decode percent escapes, use the last value for repeated keys, and treat a key without `=` as an empty string.',{query:'?name=Jo%20Lee&mode=fast&mode=safe&flag'}, {name:'Jo Lee',mode:'safe',flag:''},{query:'?x=1&x=2'}, {x:'2'}, ['parsing','strings'],'Beginner'],
+  ['CSV row summarizer','Parse a CSV document with a header row and return an array of objects. Support quoted commas and escaped double quotes.',{csv:'name,count\nAda,2\n"Lin, Jr",3'},[{name:'Ada',count:'2'},{name:'Lin, Jr',count:'3'}],{csv:'name,city\nA,"New York"'},[{name:'A',city:'New York'}],['parsing','state machines'],'Intermediate'],
+  ['Access log report','Group log entries by status code and return counts sorted by numeric status code.',{lines:['GET / 200','POST /items 201','GET /missing 404','GET / 200']},[{status:200,count:2},{status:201,count:1},{status:404,count:1}],{lines:[]},[],['strings','maps'],'Beginner'],
+  ['Invoice total','Return subtotal, tax, and total in cents. Apply the supplied integer tax rate in basis points and round tax to the nearest cent.',{items:[{priceCents:199,quantity:2},{priceCents:250,quantity:1}],taxBps:800},{subtotalCents:648,taxCents:52,totalCents:700},{items:[],taxBps:0},{subtotalCents:0,taxCents:0,totalCents:0},['arithmetic','rounding'],'Beginner'],
+  ['Markdown heading index','Extract Markdown headings and return their depth, text, and one-based line number.',{markdown:'# Intro\nText\n## Details\n### Edge cases'},[{level:1,text:'Intro',line:1},{level:2,text:'Details',line:3},{level:3,text:'Edge cases',line:4}],{markdown:'plain text'},[],['parsing','regular expressions'],'Intermediate'],
+  ['Inventory reducer','Apply add and remove events to item quantities. Ignore removals that would make a quantity negative; return item keys alphabetically.',{events:[{op:'add',item:'pen',quantity:4},{op:'remove',item:'pen',quantity:2},{op:'remove',item:'pen',quantity:5}]},{pen:2},{events:[{op:'add',item:'book',quantity:1}]},{book:1},['maps','state'],'Beginner'],
+  ['Time range formatter','Merge overlapping time ranges and return compact strings in HH:MM-HH:MM format.',{ranges:[[540,600],[590,660],[720,780]]},['09:00-11:00','12:00-13:00'],{ranges:[]},[],['intervals','formatting'],'Intermediate'],
+  ['Color contrast helper','Convert two six-digit hex colors to relative luminance and return the contrast ratio rounded to two decimals.',{foreground:'#000000',background:'#ffffff'},{ratio:21},{foreground:'#ffffff',background:'#ffffff'},{ratio:1},['number conversion','geometry'],'Advanced'],
+  ['JSON patch applier','Apply a list of set and remove operations to a JSON object using dot-separated paths. Return the updated object.',{value:{profile:{name:'Ari',active:true}},operations:[{op:'set',path:'profile.name',value:'Rae'},{op:'remove',path:'profile.active'}]},{profile:{name:'Rae'}},{value:{a:1},operations:[{op:'set',path:'b',value:2}]},{a:1,b:2},['objects','mutation'],'Advanced'],
+  ['Command option parser','Parse command tokens into an options object. Support --key value, --flag, and --no-flag forms.',{tokens:['--port','8080','--watch','--no-cache']},{port:'8080',watch:true,cache:false},{tokens:['--name','Ada']},{name:'Ada'},['parsing','state'],'Intermediate'],
+  ['Search result ranker','Score documents by how many query terms appear in their title, then return IDs by descending score and ascending ID.',{query:'blue bird',documents:[{id:'b',title:'Blue bird guide'},{id:'a',title:'Bird notes'},{id:'c',title:'Blue sky'}]},['b','a','c'],{query:'x',documents:[{id:'z',title:'None'}]},['z'],['text search','sorting'],'Advanced'],
+  ['Diff summary','Compare two arrays of strings and return added and removed values in original input order.',{before:['a','b','c'],after:['b','c','d']},{added:['d'],removed:['a']},{before:[],after:['new']},{added:['new'],removed:[]},['sets','arrays'],'Advanced']
 ];
 
-export const BUILD_EXERCISES: Exercise[] = buildBriefs.map(([name, focus, input, output, edgeInput, edgeOutput, tags], index) => {
+export const BUILD_EXERCISES: Exercise[] = buildBriefs.map(([name, focus, input, output, edgeInput, edgeOutput, tags, difficulty]) => {
   const id = `build-${slug(name)}`;
   return {
     id,
     kind: 'build',
     topic: 'Single-file builds',
     title: name,
-    difficulty: index < 4 ? 'Beginner' : index < 9 ? 'Intermediate' : 'Advanced',
+    difficulty,
     tags: [...tags, 'single-file build'],
     prompt: `${focus}\n\nBuild this as a single-file utility. Implement solve(input) -> JSON and keep the behavior deterministic.`,
     constraints: ['Use only the selected language standard library.', 'Return JSON-compatible values.', 'Keep the implementation in one file.'],
@@ -170,7 +170,7 @@ export const BUILD_EXERCISES: Exercise[] = buildBriefs.map(([name, focus, input,
       { id: `${id}-example-1`, label: 'Example 1', input, expectedOutput: output },
       { id: `${id}-example-2`, label: 'Example 2', input: edgeInput, expectedOutput: edgeOutput }
     ],
-    estimatedMinutes: 25 + (index % 3) * 10
+    estimatedMinutes: difficulty === 'Beginner' ? 15 : difficulty === 'Intermediate' ? 25 : 40
   };
 });
 

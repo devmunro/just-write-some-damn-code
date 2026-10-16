@@ -16,6 +16,12 @@
 
   type SandboxStatus = { engine: string | null; imageAvailable: boolean; imageTag: string };
   type DifficultyFilter = 'all' | 'Beginner' | 'Intermediate' | 'Advanced';
+  const difficultyOptions: Array<{ value: DifficultyFilter; label: string }> = [
+    { value: 'Beginner', label: 'Easy' },
+    { value: 'Intermediate', label: 'Medium' },
+    { value: 'Advanced', label: 'Hard' },
+    { value: 'all', label: 'All' }
+  ];
   const allDsaTopics = [...new Set(DSA_EXERCISES.map((exercise) => exercise.topic))];
   const emptyPreferences: EditorPreferencesByLanguage = {
     python: { autoIndent: true, autoCloseBrackets: true, autoCloseQuotes: true },
@@ -55,10 +61,13 @@
   let draftTimer: ReturnType<typeof setTimeout> | undefined;
 
   $: topicExercises = track === 'build' ? BUILD_EXERCISES : DSA_EXERCISES.filter((exercise) => selectedTopic === 'All topics' || exercise.topic === selectedTopic);
-  $: baseTrackExercises = track === 'build' || difficultyFilter === 'all'
+  $: baseTrackExercises = difficultyFilter === 'all'
     ? topicExercises
     : topicExercises.filter((exercise) => exercise.difficulty === difficultyFilter);
-  $: trackExercises = generatedVariant && generatedVariant.kind === track ? [generatedVariant, ...baseTrackExercises] : baseTrackExercises;
+  $: trackExercises = [
+    ...(generatedVariant && generatedVariant.kind === track && (difficultyFilter === 'all' || generatedVariant.difficulty === difficultyFilter) ? [generatedVariant] : []),
+    ...baseTrackExercises
+  ];
   $: visibleExercises = trackExercises.filter((exercise) => !query.trim() || `${exercise.title} ${exercise.tags.join(' ')} ${exercise.prompt}`.toLowerCase().includes(query.toLowerCase()));
   $: difficultyCounts = {
     all: topicExercises.length,
@@ -107,10 +116,10 @@
   async function chooseTrack(next: 'dsa' | 'build') {
     track = next;
     generatedVariant = null;
-    if (next === 'build') await selectExercise(BUILD_EXERCISES[0]);
+    difficultyFilter = 'Beginner';
+    if (next === 'build') await selectExercise(BUILD_EXERCISES.find((exercise) => exercise.difficulty === 'Beginner'));
     else {
       selectedTopic = 'All topics';
-      difficultyFilter = 'Beginner';
       await selectExercise(DSA_EXERCISES.find((exercise) => exercise.difficulty === 'Beginner'));
     }
   }
@@ -125,10 +134,11 @@
 
   async function changeDifficulty(next: DifficultyFilter) {
     difficultyFilter = next;
-    generatedVariant = null;
-    const matches = DSA_EXERCISES.filter((exercise) => (selectedTopic === 'All topics' || exercise.topic === selectedTopic)
-      && (next === 'all' || exercise.difficulty === next));
-    await selectExercise(matches[0]);
+    const catalog = track === 'build' ? BUILD_EXERCISES : DSA_EXERCISES.filter((exercise) => selectedTopic === 'All topics' || exercise.topic === selectedTopic);
+    const generatedMatch = generatedVariant && generatedVariant.kind === track && (next === 'all' || generatedVariant.difficulty === next)
+      ? generatedVariant
+      : undefined;
+    await selectExercise(generatedMatch ?? catalog.find((exercise) => next === 'all' || exercise.difficulty === next));
   }
 
   async function changeLanguage(event: Event) {
@@ -221,7 +231,9 @@
   }
 
   function pretty(value: unknown): string { return JSON.stringify(value, null, 2); }
-  function displayDifficulty(difficulty: Exercise['difficulty']) { return difficulty === 'Beginner' ? 'Easy' : difficulty; }
+  function displayDifficulty(difficulty: Exercise['difficulty']) {
+    return difficulty === 'Beginner' ? 'Easy' : difficulty === 'Intermediate' ? 'Medium' : 'Hard';
+  }
   function handleEditorInput(value: string) {
     submission = value;
     if (draftTimer) clearTimeout(draftTimer);
@@ -275,14 +287,21 @@
           {/each}
           </select><ChevronDown size={14} /></span></label>
           <div class="difficulty-filters" aria-label="Difficulty">
-            {#each [{ value: 'Beginner', label: 'Easy' }, { value: 'Intermediate', label: 'Medium' }, { value: 'Advanced', label: 'Hard' }, { value: 'all', label: 'All' }] as option}
-              <button class:level-active={difficultyFilter === option.value} disabled={difficultyCounts[option.value as DifficultyFilter] === 0} on:click={() => changeDifficulty(option.value as DifficultyFilter)}>{option.label}<span>{difficultyCounts[option.value as DifficultyFilter]}</span></button>
+            {#each difficultyOptions as option}
+              <button class:level-active={difficultyFilter === option.value} disabled={difficultyCounts[option.value] === 0} on:click={() => changeDifficulty(option.value)}>{option.label}<span>{difficultyCounts[option.value]}</span></button>
             {/each}
           </div>
           <details class="study-links"><summary>Study maps <ChevronDown size={12} /></summary><a href="https://neetcode.io/practice/practice/neetcode250" target="_blank" rel="noreferrer"><ExternalLink size={12} /> NeetCode 250</a><a href="https://leetcode.com/studyplan/top-interview-150/" target="_blank" rel="noreferrer"><ExternalLink size={12} /> LeetCode Top Interview 150</a></details>
         </div>
       {:else}
-        <div class="build-track-note"><span class="track-icon"><FileCode2 size={16} /></span><div><strong>Small builds</strong><p>12 practical projects. One file at a time.</p></div></div>
+        <div class="build-track-controls">
+          <div class="build-track-note"><span class="track-icon"><FileCode2 size={16} /></span><div><strong>Small builds</strong><p>12 single-file tasks. Pick a level.</p></div></div>
+          <div class="difficulty-filters" aria-label="Build difficulty">
+            {#each difficultyOptions as option}
+              <button class:level-active={difficultyFilter === option.value} disabled={difficultyCounts[option.value] === 0} on:click={() => changeDifficulty(option.value)}>{option.label}<span>{difficultyCounts[option.value]}</span></button>
+            {/each}
+          </div>
+        </div>
       {/if}
 
       <div class="exercise-browser">

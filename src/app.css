@@ -305,6 +305,9 @@ html, body { background: #000; }
 .build-track-note { margin: 13px 13px 8px; padding: 10px; border: 1px solid #202520; border-radius: 6px; background: #050505; }
 .build-track-note strong { font-size: 11px; }
 .build-track-note p { font-size: 10px; }
+.build-track-controls { flex: 0 0 auto; padding: 11px 0 1px; border-bottom: 1px solid #202020; }
+.build-track-controls .build-track-note { margin: 0 11px 9px; }
+.build-track-controls .difficulty-filters { margin: 0 11px 10px; }
 
 .editor-pane { min-height: 0; background: #000; }
 .challenge-summary { flex: 0 0 auto; min-width: 0; padding: 12px 19px 10px; border-bottom: 1px solid #202020; background: #000; }
@@ -416,7 +419,9 @@ html, body { background: #000; }
   .exercise-list { grid-column: 1 / -1; grid-row: 2; display: flex; overflow-x: auto; overflow-y: hidden; padding: 0 7px 7px; }
   .exercise-row { width: 205px; min-width: 205px; min-height: 48px; flex: 0 0 205px; }
   .sidebar-footnote { display: none; }
-  .build-track-note { margin: 6px 9px; padding: 7px; }
+  .build-track-controls { display: flex; align-items: center; gap: 8px; padding: 6px 9px; }
+  .build-track-controls .build-track-note { min-width: 0; flex: 1; margin: 0; padding: 7px; }
+  .build-track-controls .difficulty-filters { width: min(220px, 56%); flex: 0 0 auto; margin: 0; }
   .build-track-note p { font-size: 9px; }
   .editor-pane { flex: 1; min-height: 0; }
   .challenge-summary { padding: 8px 10px 7px; }
