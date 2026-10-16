@@ -7,12 +7,11 @@
   import SettingsDrawer from '$lib/components/SettingsDrawer.svelte';
   import { DSA_EXERCISES, BUILD_EXERCISES } from '$lib/practice/catalog';
   import { editorBehaviorProfiles, editorLanguages, type EditorLanguage } from '$lib/submission/modes';
-  import type { EditorPreferencesByLanguage, Exercise, ExerciseStatus, Feedback, GeneratedVariant, JsonValue, OllamaSettings, PracticeLanguage, RunRequest, RunResult } from '$lib/domain/types';
-  import { listChallengeHistory } from '$lib/history/repository';
-  import { loadDraft, saveDraft, loadEditorPreferences, saveEditorPreferences, loadOllamaSettings, saveOllamaSettings, loadProgress, saveProgress } from '$lib/practice/repository';
+  import type { EditorPreferencesByLanguage, Exercise, Feedback, GeneratedVariant, JsonValue, OllamaSettings, PassedExerciseHistoryItem, PracticeLanguage, RunRequest, RunResult } from '$lib/domain/types';
+  import { listPassedExercises, recordExercisePassed } from '$lib/history/repository';
+  import { loadDraft, saveDraft, loadEditorPreferences, saveEditorPreferences, loadOllamaSettings, saveOllamaSettings } from '$lib/practice/repository';
   import { generateExerciseVariant, reviewExerciseSubmission } from '$lib/ai/ollama';
   import { isTauriRuntime } from '$lib/platform/tauri';
-  import type { ChallengeHistoryItem } from '$lib/domain/types';
 
   type SandboxStatus = { engine: string | null; imageAvailable: boolean; imageTag: string };
   type DifficultyFilter = 'all' | 'Beginner' | 'Intermediate' | 'Advanced';
@@ -39,14 +38,13 @@
   let editorLanguage: PracticeLanguage = 'python';
   let editorTypography = { fontSize: 15, lineHeight: 24 };
   let preferences = emptyPreferences;
-  let progress: Record<string, ExerciseStatus> = {};
   let submission = '';
   let loadedDraftKey = '';
   let result: RunResult | null = null;
   let sandbox: SandboxStatus = { engine: null, imageAvailable: false, imageTag: 'jwsdc-runner:1.0.0' };
   let settings: OllamaSettings = { baseUrl: 'http://localhost:11434', model: '' };
   let feedback: Feedback | null = null;
-  let history: ChallengeHistoryItem[] = [];
+  let history: PassedExerciseHistoryItem[] = [];
   let query = '';
   let error = '';
   let notice = '';
@@ -82,8 +80,8 @@
 
   onMount(async () => {
     try {
-      [settings, preferences, progress, history] = await Promise.all([
-        loadOllamaSettings(), loadEditorPreferences(), loadProgress(), listChallengeHistory()
+      [settings, preferences, history] = await Promise.all([
+        loadOllamaSettings(), loadEditorPreferences(), listPassedExercises()
       ]);
     } catch (cause) {
       console.warn('Could not load local practice data.', cause);
@@ -161,12 +159,6 @@
     await saveEditorPreferences(preferences);
   }
 
-  async function markStatus(status: ExerciseStatus) {
-    if (!selectedExercise) return;
-    progress = { ...progress, [selectedExercise.id]: status };
-    await saveProgress(selectedExercise.id, status);
-  }
-
   async function refreshSandbox() {
     if (!isTauriRuntime()) return;
     try { sandbox = await invoke<SandboxStatus>('sandbox_status'); }
@@ -189,7 +181,15 @@
       if (!isTauriRuntime()) throw new Error('Run is available in the desktop app after setting up its local container runner. You can still write and save code here.');
       const request: RunRequest = { exerciseId: selectedExercise.id, language: editorLanguage, source: submission, cases: selectedExercise.examples };
       result = await invoke<RunResult>('run_code', { request });
-      if (result.status === 'passed') notice = 'Examples passed. Keep exploring edge cases.';
+      if (result.status === 'passed') {
+        try {
+          await recordExercisePassed({ exerciseId: selectedExercise.id, title: selectedExercise.title, language: editorLanguage });
+          history = await listPassedExercises();
+          notice = 'Added to History.';
+        } catch {
+          notice = 'Passed. Could not save to History.';
+        }
+      }
     } catch (cause) { error = cause instanceof Error ? cause.message : String(cause); }
     finally { isRunning = false; }
   }
@@ -256,7 +256,6 @@
       const language = editorLanguage;
       draftTimer = setTimeout(() => { void saveDraft(exerciseId, language, value); }, 350);
     }
-    if (selectedExercise && value.trim() && (!progress[selectedExercise.id] || progress[selectedExercise.id] === 'not-started')) void markStatus('in-progress');
   }
 
   function handleGlobalKeydown(event: KeyboardEvent) {
@@ -325,7 +324,6 @@
         <div class="exercise-list">
           {#each visibleExercises as exercise}
             <button class:exercise-active={selectedId === exercise.id} class="exercise-row" on:click={() => selectExercise(exercise)}>
-              <span class="exercise-status-dot" class:status-done={progress[exercise.id] === 'done'} class:status-started={progress[exercise.id] === 'in-progress'}>{#if progress[exercise.id] === 'done'}<Check size={11} />{/if}</span>
               <span class="exercise-row-copy"><span class="exercise-row-title">{exercise.title}</span></span>
             </button>
           {:else}
@@ -414,7 +412,6 @@
           <div class="example-card"><div class="example-label">{example.label}</div><div class="example-io"><div class="example-line"><span>Input:</span><pre>{formatExampleInput(example.input)}</pre></div><div class="example-line"><span>Output:</span><pre>{formatExampleValue(example.expectedOutput)}</pre></div></div></div>
         {/each}
       </section>
-      <section class="detail-section status-section"><label for="exercise-status">MY STATUS</label><div class="status-select-wrap"><select id="exercise-status" value={progress[selectedExercise.id] ?? 'not-started'} on:change={(event) => markStatus((event.currentTarget as HTMLSelectElement).value as ExerciseStatus)}><option value="not-started">Not started</option><option value="in-progress">In progress</option><option value="done">Done</option></select><ChevronDown size={14} /></div></section>
       {#if feedback}
         <section class="feedback-card"><div class="feedback-title"><Bot size={15} /><strong>Local feedback</strong><button class="icon-quiet small" on:click={() => (feedback = null)} aria-label="Dismiss feedback"><X size={14} /></button></div>
           {#each [['Strengths', feedback.strengths], ['Could improve', feedback.weaknesses], ['Try next', feedback.suggestions], ['Think about', feedback.followUpQuestions]] as group}

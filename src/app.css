@@ -62,9 +62,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .exercise-row { width: 100%; min-height: 46px; display: flex; align-items: center; gap: 8px; padding: 5px 7px; border: 1px solid transparent; border-radius: 5px; background: transparent; text-align: left; }
 .exercise-row:hover { background: #202321; }
 .exercise-row.exercise-active { border-color: #34483b; background: #202923; }
-.exercise-status-dot { width: 14px; height: 14px; flex: 0 0 14px; display: grid; place-items: center; border: 1px solid #525a54; border-radius: 50%; color: #121713; }
-.exercise-status-dot.status-started { border-color: #c2a86c; background: #c2a86c; }
-.exercise-status-dot.status-done { border-color: #73c99b; background: #73c99b; }
 .exercise-row-copy { min-width: 0; flex: 1; display: block; }
 .exercise-row-title { overflow: hidden; color: #d2d7d2; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .empty-search { padding: 12px 8px; color: #8a938c; font-size: 10px; }
@@ -108,11 +105,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .example-io > div > span { display: block; margin-bottom: 4px; color: #6f7b71; font-size: 7px; font-weight: 800; letter-spacing: .1em; }
 .example-io pre { max-height: 100px; overflow: auto; margin: 0; color: #b6c9bc; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
 .io-arrow { color: #74867a; font-size: 13px; text-align: center; }
-.status-section { padding: 10px 0 2px; border-top: 1px solid #292e2a; }
-.status-section > label { display: block; margin-bottom: 7px; color: #78827a; font-size: 8px; font-weight: 800; letter-spacing: .11em; }
-.status-select-wrap { position: relative; }
-.status-select-wrap select { width: 100%; height: 31px; appearance: none; padding: 0 28px 0 9px; border: 1px solid #333b35; border-radius: 5px; color: #c4ccc5; background: #1a1d1b; font-size: 10px; }
-.status-select-wrap svg { position: absolute; right: 9px; top: 9px; color: #89948b; pointer-events: none; }
 .feedback-card { margin: 15px 0 0; padding: 12px; border: 1px solid #3e493f; border-radius: 6px; background: #1b221d; }
 .feedback-title { display: flex; align-items: center; gap: 7px; color: #b7e4c7; font-size: 11px; }
 .feedback-title .icon-quiet { margin-left: auto; }
@@ -391,8 +383,6 @@ html, body { background: #000; }
 .example-line > span { padding-top: 1px; color: #9da79e; font-size: 11px; font-weight: 650; }
 .example-line pre { min-width: 0; max-height: 140px; overflow: auto; color: #d0d8d1; font-size: 12px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
 .io-arrow { display: none; }
-.details-dialog-body .status-section { margin-top: 7px; border-top-color: #242424; }
-.details-dialog-body .status-select-wrap select { background: #030303; }
 .details-dialog-body .feedback-card { background: #030303; }
 
 @media (max-width: 960px) {

@@ -424,6 +424,12 @@ pub fn run() {
             ",
             kind: tauri_plugin_sql::MigrationKind::Up,
         },
+        tauri_plugin_sql::Migration {
+            version: 3,
+            description: "record passed exercises without submissions",
+            sql: "CREATE TABLE IF NOT EXISTS passed_exercises (exercise_id TEXT PRIMARY KEY, title TEXT NOT NULL, language TEXT NOT NULL, passed_at TEXT NOT NULL);",
+            kind: tauri_plugin_sql::MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

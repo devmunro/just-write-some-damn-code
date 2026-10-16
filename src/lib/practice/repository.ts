@@ -1,5 +1,5 @@
 import Database from '@tauri-apps/plugin-sql';
-import type { EditorPreferencesByLanguage, ExerciseStatus, OllamaSettings, PracticeLanguage } from '$lib/domain/types';
+import type { EditorPreferencesByLanguage, OllamaSettings, PracticeLanguage } from '$lib/domain/types';
 import { isTauriRuntime } from '$lib/platform/tauri';
 
 const DB_URL = 'sqlite:practice.db';
@@ -33,26 +33,6 @@ export async function saveDraft(exerciseId: string, language: PracticeLanguage, 
   await db.execute(`INSERT INTO exercise_drafts (exercise_id, language, source, updated_at)
     VALUES ($1, $2, $3, $4) ON CONFLICT(exercise_id, language) DO UPDATE SET source = excluded.source, updated_at = excluded.updated_at`,
     [exerciseId, language, source, updatedAt]);
-}
-
-export async function loadProgress(): Promise<Record<string, ExerciseStatus>> {
-  if (!isTauriRuntime()) {
-    try { return JSON.parse(localStorageGet('progress') ?? '{}') as Record<string, ExerciseStatus>; } catch { return {}; }
-  }
-  const rows = await (await getDb()).select<Array<{ exercise_id: string; status: ExerciseStatus }>>(
-    'SELECT exercise_id, status FROM exercise_progress'
-  );
-  return Object.fromEntries(rows.map((row) => [row.exercise_id, row.status]));
-}
-
-export async function saveProgress(exerciseId: string, status: ExerciseStatus): Promise<void> {
-  const updatedAt = new Date().toISOString();
-  if (!isTauriRuntime()) {
-    const progress = await loadProgress(); progress[exerciseId] = status; localStorageSet('progress', JSON.stringify(progress)); return;
-  }
-  await (await getDb()).execute(`INSERT INTO exercise_progress (exercise_id, status, updated_at)
-    VALUES ($1, $2, $3) ON CONFLICT(exercise_id) DO UPDATE SET status = excluded.status, updated_at = excluded.updated_at`,
-    [exerciseId, status, updatedAt]);
 }
 
 export async function loadOllamaSettings(): Promise<OllamaSettings> {

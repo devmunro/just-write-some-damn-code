@@ -20,7 +20,6 @@ export type DsaTopic = (typeof DSA_TOPICS)[number];
 export type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced';
 export type PracticeLanguage = 'python' | 'javascript' | 'typescript' | 'php';
 export type ExerciseKind = 'dsa' | 'build';
-export type ExerciseStatus = 'not-started' | 'in-progress' | 'done';
 export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
 
 export type ExampleCase = {
@@ -75,12 +74,6 @@ export type EditorPreferences = {
 
 export type EditorPreferencesByLanguage = Record<PracticeLanguage, EditorPreferences>;
 
-export type PracticeProgress = {
-  exerciseId: string;
-  status: ExerciseStatus;
-  updatedAt: string;
-};
-
 export type GeneratedVariant = Exercise & {
   generatedBy: 'ollama';
   generatedAt: string;
@@ -103,5 +96,12 @@ export type ChallengeHistoryItem = {
   id: string;
   challengeText: string;
   createdAt: string;
+};
+
+export type PassedExerciseHistoryItem = {
+  exerciseId: string;
+  title: string;
+  language: PracticeLanguage;
+  passedAt: string;
 };
 
