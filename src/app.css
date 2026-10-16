@@ -16,6 +16,8 @@
   --faint: #68706a;
   --green: #81d4ad;
   --mint: #b7ebd0;
+  --font-display: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  --font-code-label: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -260,12 +262,16 @@ html, body { background: #000; }
 .brand-mark { width: 42px; height: 40px; flex: 0 0 42px; display: grid; place-items: center; border: 0; border-radius: 0; color: #080808; background: #ff5747; clip-path: polygon(48% 0, 61% 14%, 78% 4%, 80% 22%, 100% 24%, 88% 42%, 100% 57%, 81% 64%, 85% 84%, 64% 80%, 52% 100%, 41% 82%, 21% 94%, 21% 73%, 0 67%, 13% 50%, 0 33%, 21% 28%, 18% 8%, 39% 16%); filter: drop-shadow(0 0 7px rgba(255, 87, 71, .24)); transform: rotate(-7deg); }
 .brand-mark span { font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif; font-size: 14px; font-weight: 1000; letter-spacing: -.12em; line-height: 1; transform: rotate(7deg) scaleX(.9); }
 .brand-name { display: flex; align-items: baseline; gap: 6px; color: #f1f1ec; font-size: 20px; font-weight: 900; letter-spacing: -.06em; line-height: 1; }
+.brand-name { font-family: var(--font-display); letter-spacing: -.025em; }
 .brand-just { color: #a5aaa4; font-size: 18px; font-weight: 800; letter-spacing: -.08em; transform: rotate(-5deg); }
 .brand-write { display: inline-block; color: #f0f1ec; font-size: 25px; font-weight: 1000; letter-spacing: -.1em; transform: skew(-5deg) rotate(-1deg); }
 .brand-some { display: inline-block; color: #98a19a; font-size: 17px; font-style: italic; font-weight: 800; letter-spacing: -.09em; transform: rotate(3deg); }
 .brand-damn { display: inline-block; padding: 3px 7px 2px; color: #080808; background: #ff5747; font-size: 22px; font-weight: 1000; letter-spacing: -.04em; line-height: .95; transform: rotate(-3deg) skew(-5deg); }
 .brand-code { display: inline-block; color: #f0f1ec; font-size: 22px; font-weight: 1000; letter-spacing: -.1em; transform: rotate(2deg); }
 .brand-shout { display: inline-block; color: #caff48; font-size: 30px; font-weight: 1000; line-height: .8; transform: rotate(9deg) translateY(-2px); }
+.brand-just, .brand-write, .brand-damn { font-family: var(--font-display); }
+.brand-some { font-family: Georgia, "Times New Roman", serif; }
+.brand-code { font-family: var(--font-code-label); }
 .topbar-actions { min-width: auto; }
 .workspace-grid { grid-template-columns: 254px minmax(0, 1fr); background: #000; }
 .sidebar { background: #000; border-right-color: #202020; }
@@ -273,6 +279,10 @@ html, body { background: #000; }
 .sidebar-switcher button { height: 34px; font-size: 11px; }
 .catalog-controls { flex: 0 0 auto; padding: 12px 11px 9px; border-bottom: 1px solid #202020; }
 .catalog-heading { display: flex; justify-content: space-between; align-items: center; margin: 0 2px 10px; color: #dfe3df; font-size: 10px; font-weight: 750; letter-spacing: .1em; }
+.catalog-heading, .exercise-heading, .task-breadcrumb, .challenge-kicker, .dialog-eyebrow, .contract-heading, .section-header > span {
+  font-family: var(--font-code-label);
+  letter-spacing: .075em;
+}
 .catalog-heading span:last-child { color: #707871; font-size: 9px; font-weight: 500; letter-spacing: 0; }
 .topic-select-wrap { display: flex; flex-direction: column; gap: 5px; margin-bottom: 9px; color: #727a74; font-size: 8px; font-weight: 750; letter-spacing: .1em; }
 .topic-select-control { position: relative; display: flex; align-items: center; }
@@ -322,6 +332,12 @@ html, body { background: #000; }
 .summary-button:hover:not(:disabled) { border-color: #3d4c41; color: #d6e8dc; background: #0b0e0c; }
 .summary-variant { color: #ceb982; }
 .challenge-summary h1 { overflow: hidden; margin: 5px 0 3px; color: #f1f2ef; font-size: clamp(17px, 1.55vw, 21px); font-weight: 650; letter-spacing: -.035em; line-height: 1.24; text-overflow: ellipsis; white-space: nowrap; }
+.task-title-row h1, .challenge-summary h1, .details-dialog-header h2 {
+  font-family: var(--font-display);
+  font-variant: small-caps;
+  font-weight: 800;
+  letter-spacing: .015em;
+}
 .challenge-summary > p { display: -webkit-box; overflow: hidden; margin: 0; color: #999f9a; font-size: 11px; line-height: 1.45; white-space: pre-line; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .empty-summary { min-height: 94px; display: flex; align-items: center; gap: 9px; color: #848c85; font-size: 12px; }
 .empty-summary svg { color: #738278; }
