@@ -276,7 +276,7 @@
 <div class="app-shell">
   <header class="topbar">
     <div class="brand-lockup" role="img" aria-label="Just Write Some Damn Code">
-      <div class="brand-mark" aria-hidden="true"><span>@!#</span></div>
+      <div class="brand-mark" aria-hidden="true"><span>@#$!</span></div>
       <div class="brand-name" aria-hidden="true"><span class="brand-just">juSt</span><span class="brand-write">WRITE</span><span class="brand-some">sOme</span><span class="brand-damn">DAMN</span><span class="brand-code">cODe</span><span class="brand-shout">!</span></div>
     </div>
     <div class="topbar-actions">
