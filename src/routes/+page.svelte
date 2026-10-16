@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { invoke } from '@tauri-apps/api/core';
-  import { BookOpen, Bot, Braces, Check, CheckCircle2, ChevronDown, Circle, Code2, ExternalLink, FileCode2, FlaskConical, History, ListFilter, Loader2, Play, Search, Settings2, Sparkles, Terminal, WandSparkles, X } from '@lucide/svelte';
+  import { BookOpen, Bot, Braces, Check, CheckCircle2, ChevronDown, Circle, Code2, Container, Dices, ExternalLink, FileCode2, History, LibraryBig, ListFilter, Loader2, MessageSquareText, PanelLeftClose, PanelLeftOpen, Play, Search, Settings2, Sparkles, Terminal, X } from '@lucide/svelte';
   import CodeEditor from '$lib/components/CodeEditor.svelte';
   import HistoryDrawer from '$lib/components/HistoryDrawer.svelte';
   import SettingsDrawer from '$lib/components/SettingsDrawer.svelte';
@@ -56,6 +56,7 @@
   let isReviewing = false;
   let showSettings = false;
   let showHistory = false;
+  let showSidebar = true;
   let showEditorOptions = false;
   let detailsDialog: HTMLDialogElement;
   let draftTimer: ReturnType<typeof setTimeout> | undefined;
@@ -80,6 +81,7 @@
   $: isGenerated = Boolean(selectedExercise && 'generatedBy' in selectedExercise);
 
   onMount(async () => {
+    showSidebar = localStorage.getItem('practice-sidebar-visible') !== 'false';
     try {
       [settings, preferences, history] = await Promise.all([
         loadOllamaSettings(), loadEditorPreferences(), listPassedExercises()
@@ -230,7 +232,7 @@
   }
 
   async function openHistory() {
-    history = await listChallengeHistory();
+    history = await listPassedExercises();
     showHistory = true;
   }
 
@@ -250,6 +252,13 @@
   }
   function displayDifficulty(difficulty: Exercise['difficulty']) {
     return difficulty === 'Beginner' ? 'Easy' : difficulty === 'Intermediate' ? 'Medium' : 'Hard';
+  }
+  function compactDifficulty(difficulty: Exercise['difficulty']) {
+    return difficulty === 'Beginner' ? 'Easy' : difficulty === 'Intermediate' ? 'Med' : 'Hard';
+  }
+  function toggleSidebar() {
+    showSidebar = !showSidebar;
+    localStorage.setItem('practice-sidebar-visible', String(showSidebar));
   }
   function handleEditorInput(value: string) {
     submission = value;
@@ -278,17 +287,30 @@
 
 <div class="app-shell">
   <header class="topbar">
-    <div class="brand-lockup" role="img" aria-label="Just Write Some Damn Code">
-      <div class="brand-mark" aria-hidden="true"><span>@#</span></div>
-      <div class="brand-name" aria-hidden="true"><span class="brand-just">juSt</span><span class="brand-write">WRITE</span><span class="brand-some">sOme</span><span class="brand-damn">DAMN</span><span class="brand-code">cODe</span><span class="brand-shout">!</span></div>
+    <div class="topbar-brand-group">
+      <button class="sidebar-toggle" on:click={toggleSidebar} aria-label={showSidebar ? 'Hide exercise sidebar' : 'Show exercise sidebar'} title={showSidebar ? 'Hide exercise sidebar' : 'Show exercise sidebar'}>
+        {#if showSidebar}<PanelLeftClose size={18} />{:else}<PanelLeftOpen size={18} />{/if}
+      </button>
+      <div class="brand-lockup" role="img" aria-label="Just Write Some Damn Code">
+        <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M24 1 L29.5 11 L40.5 7.5 L37 18.5 L47 24 L37 29.5 L40.5 40.5 L29.5 37 L24 47 L18.5 37 L7.5 40.5 L11 29.5 L1 24 L11 18.5 L7.5 7.5 L18.5 11 Z" fill="#ff5747" stroke="#ffae69" stroke-width="1.2" stroke-linejoin="round" />
+          <circle cx="24" cy="24" r="13.5" fill="#080908" stroke="#ffd15d" stroke-width="1.7" />
+          <text x="24" y="28.5" text-anchor="middle" fill="#ffd15d" font-family="ui-monospace, monospace" font-size="11.5" font-weight="900" letter-spacing="-1">@#</text>
+        </svg>
+        <div class="brand-name" aria-hidden="true"><span class="brand-just">juSt</span><span class="brand-write">WRITE</span><span class="brand-some">sOme</span><span class="brand-damn">DAMN</span><span class="brand-code">cODe</span><span class="brand-shout">!</span></div>
+      </div>
     </div>
     <div class="topbar-actions">
+      <details class="study-collections">
+        <summary class="quiet-button" aria-label="Open external study maps"><LibraryBig size={16} /><span>Study maps</span></summary>
+        <div class="study-collections-popover"><strong>External practice collections</strong><a href="https://neetcode.io/practice/practice/neetcode250" target="_blank" rel="noreferrer">NeetCode 250 <ExternalLink size={13} /></a><a href="https://leetcode.com/studyplan/top-interview-150/" target="_blank" rel="noreferrer">LeetCode Top Interview 150 <ExternalLink size={13} /></a></div>
+      </details>
       <button class="quiet-button" on:click={openHistory} aria-label="Open saved history"><History size={16} /><span>History</span></button>
       <button class="quiet-button" on:click={() => (showSettings = true)} aria-label="Open settings"><Settings2 size={16} /><span>Settings</span></button>
     </div>
   </header>
 
-  <main class="workspace-grid">
+  <main class="workspace-grid" class:sidebar-collapsed={!showSidebar}>
     <aside class="sidebar">
       <div class="sidebar-switcher" aria-label="Practice track">
         <button class:active={track === 'dsa'} on:click={() => chooseTrack('dsa')}><Braces size={15} /> DSA</button>
@@ -308,7 +330,6 @@
               <button class:level-active={difficultyFilter === option.value} disabled={difficultyCounts[option.value] === 0} on:click={() => changeDifficulty(option.value)}>{option.label}<span>{difficultyCounts[option.value]}</span></button>
             {/each}
           </div>
-          <details class="study-links"><summary>Study maps <ChevronDown size={12} /></summary><a href="https://neetcode.io/practice/practice/neetcode250" target="_blank" rel="noreferrer"><ExternalLink size={12} /> NeetCode 250</a><a href="https://leetcode.com/studyplan/top-interview-150/" target="_blank" rel="noreferrer"><ExternalLink size={12} /> LeetCode Top Interview 150</a></details>
         </div>
       {:else}
         <div class="build-track-controls">
@@ -328,6 +349,7 @@
           {#each visibleExercises as exercise}
             <button class:exercise-active={selectedId === exercise.id} class="exercise-row" on:click={() => selectExercise(exercise)}>
               <span class="exercise-row-copy"><span class="exercise-row-title">{exercise.title}</span></span>
+              <span class="exercise-difficulty" title={`${displayDifficulty(exercise.difficulty)} difficulty`}>{compactDifficulty(exercise.difficulty)}</span>
             </button>
           {:else}
             <p class="empty-search">No exercises match that search.</p>
@@ -340,7 +362,7 @@
       {#if selectedExercise}
         <div class="challenge-summary">
           <div class="challenge-summary-top"><h1>{selectedExercise.title}</h1>
-            <div class="summary-actions"><button class="summary-button" on:click={openExerciseDetails}><BookOpen size={14} /><span>Prompt & examples</span></button><button class="summary-button summary-variant" title="Generate a variant with local Ollama" disabled={isGenerating} on:click={requestVariant}>{#if isGenerating}<Loader2 class="spin" size={14} />{:else}<WandSparkles size={14} />{/if}<span>Variant</span></button></div>
+            <div class="summary-actions"><button class="summary-button" on:click={openExerciseDetails}><BookOpen size={14} /><span>Prompt & examples</span></button><button class="summary-button summary-variant" title="Generate a new version of this challenge with local Ollama" disabled={isGenerating} on:click={requestVariant}>{#if isGenerating}<Loader2 class="spin" size={14} />{:else}<Dices size={14} />{/if}<span>Variant</span></button></div>
           </div>
         </div>
       {:else}
@@ -367,7 +389,7 @@
               </div>
             </div>{/if}
           </div>
-          <button class="review-button" disabled={isReviewing || !submission.trim()} on:click={requestFeedback} title="Ask local Ollama for qualitative feedback">{#if isReviewing}<Loader2 class="spin" size={14} />{:else}<Sparkles size={14} />{/if}<span>Feedback</span></button>
+          <button class="review-button" disabled={isReviewing || !submission.trim()} on:click={requestFeedback} title="Ask local Ollama for qualitative feedback">{#if isReviewing}<Loader2 class="spin" size={14} />{:else}<MessageSquareText size={14} />{/if}<span>Feedback</span></button>
         </div>
       </div>
 
@@ -389,7 +411,7 @@
             {#if result.stderr}<pre class="runner-stderr">{result.stderr}</pre>{/if}
           </div>
         {:else if !sandbox.imageAvailable}
-          <div class="runner-not-ready"><div class="runner-not-ready-icon"><FlaskConical size={18} /></div><div class="runner-not-ready-copy"><div class="runner-not-ready-heading"><strong>{sandbox.engine ? 'One-time setup' : 'No container engine found'}</strong><div class="runner-actions">
+          <div class="runner-not-ready"><div class="runner-not-ready-icon"><Container size={18} /></div><div class="runner-not-ready-copy"><div class="runner-not-ready-heading"><strong>{sandbox.engine ? 'One-time setup' : 'No container engine found'}</strong><div class="runner-actions">
             {#if sandbox.engine}<button class="setup-button" disabled={isSettingUp} on:click={setupSandbox}>{#if isSettingUp}<Loader2 class="spin" size={14} />{:else}<span class="download-glyph">↓</span>{/if}{isSettingUp ? 'Setting up' : 'Set up runner'}</button>{/if}
             <button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button>
           </div></div><p>{#if sandbox.engine}Build the local runner image. Network access is needed once.{:else}Install <a href="https://podman.io/docs/installation" target="_blank" rel="noreferrer">Podman</a> or <a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noreferrer">Docker</a> to run examples.{/if}</p></div>

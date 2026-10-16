@@ -6,6 +6,7 @@ describe('original practice catalog', () => {
   it('contains 250 unique DSA exercises with the requested difficulty progression', () => {
     expect(DSA_EXERCISES).toHaveLength(250);
     expect(new Set(DSA_EXERCISES.map((exercise) => exercise.id)).size).toBe(250);
+    expect(new Set(DSA_EXERCISES.map((exercise) => exercise.title.toLowerCase())).size).toBe(250);
     expect(DSA_EXERCISES.filter((exercise) => exercise.difficulty === 'Beginner')).toHaveLength(75);
     expect(DSA_EXERCISES.filter((exercise) => exercise.difficulty === 'Intermediate')).toHaveLength(125);
     expect(DSA_EXERCISES.filter((exercise) => exercise.difficulty === 'Advanced')).toHaveLength(50);
@@ -26,6 +27,7 @@ describe('original practice catalog', () => {
   it('contains 12 original single-file build tasks with the same run contract', () => {
     expect(BUILD_EXERCISES).toHaveLength(12);
     expect(new Set(BUILD_EXERCISES.map((exercise) => exercise.id)).size).toBe(12);
+    expect(new Set(BUILD_EXERCISES.map((exercise) => exercise.title.toLowerCase())).size).toBe(12);
     expect(ALL_EXERCISES).toHaveLength(262);
     expect(BUILD_EXERCISES.every((exercise) => exercise.prompt.includes('solve(input) -> JSON') && exercise.examples.length >= 2)).toBe(true);
   });

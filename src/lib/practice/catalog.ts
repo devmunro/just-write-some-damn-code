@@ -122,6 +122,15 @@ function slug(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
+function titleCaseContext(context: string): string {
+  return context
+    .replace(/\bidentifiers\b/gi, 'IDs')
+    .replace(/\bids\b/gi, 'IDs')
+    .split(' ')
+    .map((word) => word === 'IDs' ? word : `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
+    .join(' ');
+}
+
 const scenarios = blueprints.flatMap((blueprint) => blueprint.contexts.map((context, variant) => ({ blueprint, context, variant })));
 
 export const DSA_EXERCISES: Exercise[] = scenarios.map(({ blueprint, context, variant }, index) => {
@@ -130,7 +139,7 @@ export const DSA_EXERCISES: Exercise[] = scenarios.map(({ blueprint, context, va
     id,
     kind: 'dsa',
     topic: blueprint.topic,
-    title: blueprint.name,
+    title: `${titleCaseContext(context)} · ${blueprint.name}`,
     difficulty: difficulties[index],
     tags: [blueprint.topic, blueprint.name, context, 'JSON input/output'],
     prompt: `${blueprint.focus}\n\nImplement solve(input) and return the requested JSON value. The input object contains the named arguments shown in the examples.`,
