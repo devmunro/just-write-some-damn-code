@@ -1,0 +1,21 @@
+[package]
+name = "just-write-some-damn-code"
+version = "0.1.0"
+description = "A local coding practice gym where developers sharpen real engineering skills."
+authors = ["Just Write Some Damn Code"]
+edition = "2021"
+
+[lib]
+name = "just_write_some_damn_code_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = [] }
+tauri-plugin-sql = { version = "2", features = ["sqlite"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+url = "2"
