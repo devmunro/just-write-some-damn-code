@@ -130,10 +130,10 @@ export const DSA_EXERCISES: Exercise[] = scenarios.map(({ blueprint, context, va
     id,
     kind: 'dsa',
     topic: blueprint.topic,
-    title: `${context}: ${blueprint.name}`,
+    title: blueprint.name,
     difficulty: difficulties[index],
-    tags: [blueprint.topic, blueprint.name, 'JSON input/output'],
-    prompt: `${blueprint.focus}\n\nContext: ${context}. Implement a function named solve(input) that accepts one JSON value and returns one JSON value. The input fields and expected result are shown in the examples.`,
+    tags: [blueprint.topic, blueprint.name, context, 'JSON input/output'],
+    prompt: `${blueprint.focus}\n\nThis exercise uses ${context.toLowerCase()}. Implement solve(input) and return a JSON value. Examples show the expected format.`,
     constraints: ['Return JSON-compatible values only.', 'Do not read from stdin or print a solution; the runner calls solve(input).', 'Aim for linear or near-linear time when the pattern allows it.'],
     examples: makeExamples(id, blueprint),
     estimatedMinutes: difficulties[index] === 'Beginner' ? 12 : difficulties[index] === 'Intermediate' ? 22 : 35

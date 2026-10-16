@@ -260,7 +260,7 @@ html, body { background: #000; }
 .topbar { height: 54px; flex-basis: 54px; padding: 0 16px; background: #000; border-bottom-color: #202020; }
 .brand-lockup { min-width: auto; gap: 9px; }
 .brand-mark { width: 30px; height: 30px; border-radius: 7px; background: #080d0a; }
-.brand-name { font-size: 11px; letter-spacing: .07em; }
+.brand-name { font-size: 16px; letter-spacing: .04em; }
 .topbar-center { gap: 8px; font-size: 9px; color: #8b918c; }
 .topbar-actions { min-width: auto; }
 .workspace-grid { grid-template-columns: 254px minmax(0, 1fr); background: #000; }
@@ -298,7 +298,8 @@ html, body { background: #000; }
 .exercise-row:hover { background: #0d0d0d; }
 .exercise-row.exercise-active { border-color: #31503d; background: #0b130e; }
 .exercise-row-title { color: #e1e4e1; font-size: 11px; }
-.exercise-row-meta { color: #777e78; font-size: 9px; }
+.exercise-row-meta { display: flex; align-items: center; gap: 5px; overflow: hidden; color: #777e78; font-size: 9px; white-space: nowrap; }
+.exercise-row-context { min-width: 0; overflow: hidden; color: #969e97; text-overflow: ellipsis; }
 .sidebar-footnote { height: 34px; flex-basis: 34px; background: #000; border-top-color: #202020; color: #737b74; }
 .no-ai-mark { border-color: #3d4941; }
 .build-track-note { margin: 13px 13px 8px; padding: 10px; border: 1px solid #202520; border-radius: 6px; background: #050505; }
@@ -331,13 +332,15 @@ html, body { background: #000; }
 .editor-surface { min-height: 120px; padding: 0; background: #000; }
 .editor-surface > div:first-child { height: 100%; }
 .editor-placeholder { top: 15px; left: 72px; color: #626963; }
-.runner-panel { min-height: 122px; max-height: 31%; border-top-color: #252525; background: #000; }
+.runner-panel { min-height: 134px; max-height: 33%; border-top-color: #252525; background: #000; }
 .runner-header { height: 33px; flex-basis: 33px; padding: 0 13px; border-bottom-color: #202020; }
 .runner-title { font-size: 10px; }
-.runner-not-ready { min-height: 51px; padding: 6px 13px; gap: 8px; }
+.runner-not-ready { min-height: 63px; padding: 6px 13px; gap: 8px; }
 .runner-not-ready-icon { width: 26px; height: 26px; flex-basis: 26px; background: #070707; }
 .runner-not-ready strong { font-size: 10px; }
 .runner-not-ready p { margin-top: 2px; font-size: 9px; }
+.runner-not-ready p a { color: #a9dabb; text-decoration: underline; text-decoration-color: #486451; text-underline-offset: 2px; }
+.runner-not-ready p a:hover { color: #d0f1db; text-decoration-color: currentColor; }
 .runner-footer { min-height: 37px; flex-basis: 37px; border-top-color: #202020; }
 .run-button { font-size: 10px; }
 .runner-empty, .run-result { background: #000; }
@@ -368,7 +371,7 @@ html, body { background: #000; }
 @media (max-width: 650px) {
   .topbar { height: 48px; flex-basis: 48px; padding: 0 9px; }
   .brand-mark { width: 27px; height: 27px; }
-  .brand-name { font-size: 8px; letter-spacing: .05em; }
+  .brand-name { font-size: 9px; letter-spacing: .045em; }
   .topbar-center { display: none; }
   .topbar-actions { gap: 0; }
   .quiet-button { padding: 0 7px; }
@@ -412,9 +415,9 @@ html, body { background: #000; }
   .editor-actions .icon-quiet { width: 27px; height: 27px; }
   .editor-surface { min-height: 100px; }
   .editor-placeholder { left: 57px; top: 13px; gap: 10px; font-size: 9px; }
-  .runner-panel { min-height: 112px; max-height: 34%; }
+  .runner-panel { min-height: 126px; max-height: 36%; }
   .runner-header { height: 30px; flex-basis: 30px; }
-  .runner-not-ready { min-height: 43px; padding: 4px 9px; }
+  .runner-not-ready { min-height: 57px; padding: 4px 9px; }
   .runner-not-ready-icon { display: none; }
   .runner-not-ready p { max-width: 310px; }
   .runner-footer { min-height: 35px; flex-basis: 35px; padding: 0 8px; }

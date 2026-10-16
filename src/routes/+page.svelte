@@ -292,7 +292,7 @@
           {#each visibleExercises as exercise}
             <button class:exercise-active={selectedId === exercise.id} class="exercise-row" on:click={() => selectExercise(exercise)}>
               <span class="exercise-status-dot" class:status-done={progress[exercise.id] === 'done'} class:status-started={progress[exercise.id] === 'in-progress'}>{#if progress[exercise.id] === 'done'}<Check size={11} />{/if}</span>
-              <span class="exercise-row-copy"><span class="exercise-row-title">{exercise.title}</span><span class="exercise-row-meta">{displayDifficulty(exercise.difficulty)} · {exercise.estimatedMinutes} min</span></span>
+              <span class="exercise-row-copy"><span class="exercise-row-title">{exercise.title}</span><span class="exercise-row-meta">{#if track === 'dsa'}<span class="exercise-row-context">{exercise.tags[2]}</span>{/if}<span>{displayDifficulty(exercise.difficulty)} · {exercise.estimatedMinutes} min</span></span></span>
             </button>
           {:else}
             <p class="empty-search">No exercises match that search.</p>
@@ -349,7 +349,7 @@
             {#if result.stderr}<pre class="runner-stderr">{result.stderr}</pre>{/if}
           </div>
         {:else if !sandbox.imageAvailable}
-          <div class="runner-not-ready"><div class="runner-not-ready-icon"><FlaskConical size={18} /></div><div><strong>{sandbox.engine ? 'One-time runner setup' : 'Install Podman or Docker'}</strong><p>{sandbox.engine ? `Build the local ${sandbox.imageTag} image. This needs network access once.` : 'The editor and local drafts work without a container engine. Install Podman or Docker to run code.'}</p></div>
+          <div class="runner-not-ready"><div class="runner-not-ready-icon"><FlaskConical size={18} /></div><div><strong>{sandbox.engine ? 'One-time runner setup' : 'No container engine found'}</strong><p>{#if sandbox.engine}Build the local {sandbox.imageTag} image. This needs network access once.{:else}The editor works without one. Install <a href="https://podman.io/docs/installation" target="_blank" rel="noreferrer">Podman</a> or <a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noreferrer">Docker</a> to run your code.{/if}</p></div>
             {#if sandbox.engine}<button class="setup-button" disabled={isSettingUp} on:click={setupSandbox}>{#if isSettingUp}<Loader2 class="spin" size={14} />{:else}<span class="download-glyph">↓</span>{/if}{isSettingUp ? 'Setting up' : 'Set up runner'}</button>{/if}
           </div>
         {:else}
