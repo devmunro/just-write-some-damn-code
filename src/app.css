@@ -250,14 +250,14 @@ html, body { background: #000; }
 .brand-mark { position: relative; isolation: isolate; width: 42px; height: 40px; flex: 0 0 42px; display: grid; place-items: center; border: 0; border-radius: 0; color: #080808; background: #ff5747; clip-path: polygon(48% 0, 61% 14%, 78% 4%, 80% 22%, 100% 24%, 88% 42%, 100% 57%, 81% 64%, 85% 84%, 64% 80%, 52% 100%, 41% 82%, 21% 94%, 21% 73%, 0 67%, 13% 50%, 0 33%, 21% 28%, 18% 8%, 39% 16%); filter: drop-shadow(0 0 7px rgba(255, 87, 71, .24)); transform: rotate(-7deg); }
 .brand-mark::before { position: absolute; z-index: -1; inset: 7px 6px; content: ""; background: #ffd15d; clip-path: polygon(50% 0, 61% 34%, 98% 35%, 68% 57%, 79% 94%, 50% 72%, 21% 94%, 32% 57%, 2% 35%, 39% 34%); transform: rotate(8deg); }
 .brand-mark span { z-index: 1; color: #15100b; font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif; font-size: 11px; font-weight: 1000; letter-spacing: -.16em; line-height: 1; white-space: nowrap; -webkit-text-stroke: .25px rgba(255, 248, 220, .7); transform: rotate(7deg) scaleX(.9); }
-.brand-name { display: flex; align-items: baseline; gap: 6px; color: #f1f1ec; font-size: 20px; font-weight: 900; letter-spacing: -.06em; line-height: 1; }
-.brand-name { font-family: var(--font-display); letter-spacing: -.025em; }
-.brand-just { color: #a5aaa4; font-size: 18px; font-weight: 800; letter-spacing: -.08em; transform: rotate(-5deg); }
-.brand-write { display: inline-block; color: #f0f1ec; font-size: 25px; font-weight: 1000; letter-spacing: -.1em; transform: skew(-5deg) rotate(-1deg); }
-.brand-some { display: inline-block; color: #98a19a; font-size: 17px; font-style: italic; font-weight: 800; letter-spacing: -.09em; transform: rotate(3deg); }
-.brand-damn { display: inline-block; padding: 3px 7px 2px; color: #080808; background: #ff5747; font-size: 22px; font-weight: 1000; letter-spacing: -.04em; line-height: .95; transform: rotate(-3deg) skew(-5deg); }
-.brand-code { display: inline-block; color: #f0f1ec; font-size: 22px; font-weight: 1000; letter-spacing: -.1em; transform: rotate(2deg); }
-.brand-shout { display: inline-block; color: #caff48; font-size: 30px; font-weight: 1000; line-height: .8; transform: rotate(9deg) translateY(-2px); }
+.brand-name { display: flex; align-items: baseline; gap: 9px; color: #f1f1ec; font-size: 22px; font-weight: 900; letter-spacing: 0; line-height: 1; }
+.brand-name { font-family: var(--font-display); letter-spacing: 0; }
+.brand-just { color: #a5aaa4; font-size: 20px; font-weight: 800; letter-spacing: -.025em; transform: rotate(-5deg); }
+.brand-write { display: inline-block; color: #f0f1ec; font-size: 28px; font-weight: 1000; letter-spacing: -.045em; transform: skew(-5deg) rotate(-1deg); }
+.brand-some { display: inline-block; color: #98a19a; font-size: 19px; font-style: italic; font-weight: 800; letter-spacing: -.025em; transform: rotate(3deg); }
+.brand-damn { display: inline-block; padding: 3px 8px 2px; color: #080808; background: #ff5747; font-size: 24px; font-weight: 1000; letter-spacing: -.015em; line-height: .95; transform: rotate(-3deg) skew(-5deg); }
+.brand-code { display: inline-block; color: #f0f1ec; font-size: 24px; font-weight: 1000; letter-spacing: -.045em; transform: rotate(2deg); }
+.brand-shout { display: inline-block; color: #caff48; font-size: 32px; font-weight: 1000; line-height: .8; transform: rotate(9deg) translateY(-2px); }
 .brand-just, .brand-write, .brand-damn { font-family: var(--font-display); }
 .brand-some { font-family: Georgia, "Times New Roman", serif; }
 .brand-code { font-family: var(--font-code-label); }
@@ -470,7 +470,7 @@ html, body { background: #000; }
   .brand-lockup { gap: 7px; }
   .brand-mark { width: 32px; height: 30px; flex-basis: 32px; }
   .brand-mark span { font-size: 9px; }
-  .brand-name { gap: 3px; }
+  .brand-name { gap: 5px; }
   .brand-just { font-size: 12px; }
   .brand-write { font-size: 16px; }
   .brand-some { font-size: 12px; }
