@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { invoke } from '@tauri-apps/api/core';
-  import { BookOpen, Bot, Braces, Check, CheckCircle2, ChevronDown, Circle, Clock3, Code2, ExternalLink, FileCode2, FlaskConical, History, ListFilter, Loader2, Play, Search, Settings2, Sparkles, Terminal, WandSparkles, X } from '@lucide/svelte';
+  import { BookOpen, Bot, Braces, Check, CheckCircle2, ChevronDown, Circle, Code2, ExternalLink, FileCode2, FlaskConical, History, ListFilter, Loader2, Play, Search, Settings2, Sparkles, Terminal, WandSparkles, X } from '@lucide/svelte';
   import CodeEditor from '$lib/components/CodeEditor.svelte';
   import HistoryDrawer from '$lib/components/HistoryDrawer.svelte';
   import SettingsDrawer from '$lib/components/SettingsDrawer.svelte';
@@ -295,7 +295,6 @@
 
       {#if track === 'dsa'}
         <div class="catalog-controls">
-          <div class="catalog-heading"><span>DSA PRACTICE</span><span>250 drills</span></div>
           <label class="topic-select-wrap"><span>TOPIC</span><span class="topic-select-control"><select value={selectedTopic} on:change={changeTopic} aria-label="Filter by topic">
             <option value="All topics">All topics</option>
           {#each allDsaTopics as topic}
@@ -327,7 +326,7 @@
           {#each visibleExercises as exercise}
             <button class:exercise-active={selectedId === exercise.id} class="exercise-row" on:click={() => selectExercise(exercise)}>
               <span class="exercise-status-dot" class:status-done={progress[exercise.id] === 'done'} class:status-started={progress[exercise.id] === 'in-progress'}>{#if progress[exercise.id] === 'done'}<Check size={11} />{/if}</span>
-              <span class="exercise-row-copy"><span class="exercise-row-title">{exercise.title}</span><span class="exercise-row-meta">{#if track === 'dsa'}<span class="exercise-row-context">{exercise.tags[2]}</span>{/if}<span>{displayDifficulty(exercise.difficulty)} · {exercise.estimatedMinutes} min</span></span></span>
+              <span class="exercise-row-copy"><span class="exercise-row-title">{exercise.title}</span></span>
             </button>
           {:else}
             <p class="empty-search">No exercises match that search.</p>
@@ -339,11 +338,9 @@
     <section class="editor-pane" aria-label="Code editor and runner">
       {#if selectedExercise}
         <div class="challenge-summary">
-          <div class="challenge-summary-top"><div class="challenge-kicker"><span>{selectedExercise.topic}</span><span class="crumb-slash">/</span><span>{displayDifficulty(selectedExercise.difficulty)}</span><span class="summary-time"><Clock3 size={13} /> {selectedExercise.estimatedMinutes} min</span>{#if isGenerated}<span class="ai-generated-badge"><Sparkles size={11} /> AI generated</span>{/if}</div>
+          <div class="challenge-summary-top"><h1>{selectedExercise.title}</h1>
             <div class="summary-actions"><button class="summary-button" on:click={openExerciseDetails}><BookOpen size={14} /><span>Prompt & examples</span></button><button class="summary-button summary-variant" title="Generate a variant with local Ollama" disabled={isGenerating} on:click={requestVariant}>{#if isGenerating}<Loader2 class="spin" size={14} />{:else}<WandSparkles size={14} />{/if}<span>Variant</span></button></div>
           </div>
-          <h1>{selectedExercise.title}</h1>
-          <p>{selectedExercise.prompt.split('\n')[0]}</p>
         </div>
       {:else}
         <div class="challenge-summary empty-summary"><BookOpen size={17} /><span>Choose a challenge to start writing.</span></div>
@@ -375,14 +372,14 @@
 
       <div class="editor-surface" role="region" aria-label="Code space">
         <CodeEditor bind:value={submission} language={editorLanguage} preferences={currentPreferences} on:input={(event) => handleEditorInput((event as CustomEvent<string>).detail)} on:typography={(event) => (editorTypography = event.detail)} />
-        {#if !submission}<div class="editor-placeholder" style={`--editor-font-size: ${editorTypography.fontSize}px; --editor-line-height: ${editorTypography.lineHeight}px`}><span>1</span><span>Code space — write the code. Figure it out as you go.</span></div>{/if}
+        {#if !submission}<div class="editor-placeholder" style={`--editor-font-size: ${editorTypography.fontSize}px; --editor-line-height: ${editorTypography.lineHeight}px`}><span>1</span><span>Write code here.</span></div>{/if}
       </div>
 
       {#if error}<div class="message-banner error-banner"><X size={15} /><span>{error}</span><button on:click={() => (error = '')} aria-label="Dismiss error"><X size={13} /></button></div>{/if}
       {#if notice}<div class="message-banner notice-banner"><CheckCircle2 size={15} /><span>{notice}</span><button on:click={() => (notice = '')} aria-label="Dismiss message"><X size={13} /></button></div>{/if}
 
       <div class="runner-panel">
-        <div class="runner-header"><div class="runner-title"><Terminal size={16} /><strong>Local runner</strong><span class="runner-tag">Sandboxed</span></div><div class="runner-engine">{#if sandbox.engine}{sandbox.engine}{:else}Engine not detected{/if}</div></div>
+        <div class="runner-header"><div class="runner-title"><Terminal size={16} /><strong>Run code</strong></div></div>
         {#if result}
           <div class="run-result" class:result-pass={result.status === 'passed'} class:result-fail={result.status !== 'passed'}>
             <div class="result-summary"><span class="result-symbol">{#if result.status === 'passed'}<CheckCircle2 size={16} />{:else}<X size={16} />{/if}</span><strong>{result.status === 'passed' ? 'Examples passed' : result.status === 'timeout' ? 'Run timed out' : result.status === 'error' ? 'Run error' : 'Some examples failed'}</strong><span>{result.cases.filter((item) => item.passed).length} of {result.cases.length} examples passed</span><span class="result-duration">{result.durationMs} ms</span><button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button></div>
@@ -391,10 +388,10 @@
             {#if result.stderr}<pre class="runner-stderr">{result.stderr}</pre>{/if}
           </div>
         {:else if !sandbox.imageAvailable}
-          <div class="runner-not-ready"><div class="runner-not-ready-icon"><FlaskConical size={18} /></div><div class="runner-not-ready-copy"><div class="runner-not-ready-heading"><strong>{sandbox.engine ? 'One-time runner setup' : 'No container engine found'}</strong><div class="runner-actions">
+          <div class="runner-not-ready"><div class="runner-not-ready-icon"><FlaskConical size={18} /></div><div class="runner-not-ready-copy"><div class="runner-not-ready-heading"><strong>{sandbox.engine ? 'One-time setup' : 'No container engine found'}</strong><div class="runner-actions">
             {#if sandbox.engine}<button class="setup-button" disabled={isSettingUp} on:click={setupSandbox}>{#if isSettingUp}<Loader2 class="spin" size={14} />{:else}<span class="download-glyph">↓</span>{/if}{isSettingUp ? 'Setting up' : 'Set up runner'}</button>{/if}
             <button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button>
-          </div></div><p>{#if sandbox.engine}Build the local {sandbox.imageTag} image. This needs network access once.{:else}The editor works without one. Install <a href="https://podman.io/docs/installation" target="_blank" rel="noreferrer">Podman</a> or <a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noreferrer">Docker</a> to run your code.{/if}</p></div>
+          </div></div><p>{#if sandbox.engine}Build the local runner image. Network access is needed once.{:else}Install <a href="https://podman.io/docs/installation" target="_blank" rel="noreferrer">Podman</a> or <a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noreferrer">Docker</a> to run examples.{/if}</p></div>
           </div>
         {:else}
           <div class="runner-empty"><Circle size={13} /><span>Run your code against the public examples. No network access inside the runner.</span><button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button></div>
