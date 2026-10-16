@@ -1,26 +1,12 @@
 import Database from '@tauri-apps/plugin-sql';
-import { createHistoryRecord, mapHistoryRow, type ChallengeHistoryRow } from '$lib/history/record';
-import type { Challenge, ChallengeHistoryItem } from '$lib/domain/types';
+import { mapHistoryRow, type ChallengeHistoryRow } from '$lib/history/record';
+import type { ChallengeHistoryItem } from '$lib/domain/types';
 import { isTauriRuntime } from '$lib/platform/tauri';
 
 const DB_URL = 'sqlite:practice.db';
 const BROWSER_HISTORY_KEY = 'jwsdc.browser-history';
 
 let dbPromise: Promise<Database> | null = null;
-
-export async function addChallengeToHistory(challenge: Challenge): Promise<void> {
-  if (!isTauriRuntime()) {
-    addBrowserHistoryRecord(createHistoryRecord(challenge));
-    return;
-  }
-
-  const db = await getDb();
-  const record = createHistoryRecord(challenge);
-  await db.execute(
-    'INSERT INTO challenge_history (id, challenge_text, created_at) VALUES ($1, $2, $3)',
-    [record.id, record.challenge_text, record.created_at]
-  );
-}
 
 export async function listChallengeHistory(limit = 20): Promise<ChallengeHistoryItem[]> {
   if (!isTauriRuntime()) {
@@ -50,12 +36,6 @@ async function initializeDb(): Promise<Database> {
     )
   `);
   return db;
-}
-
-function addBrowserHistoryRecord(record: ChallengeHistoryRow): void {
-  if (typeof localStorage === 'undefined') return;
-  const rows = [record, ...listBrowserHistoryRecords(49)];
-  localStorage.setItem(BROWSER_HISTORY_KEY, JSON.stringify(rows));
 }
 
 function listBrowserHistoryRecords(limit: number): ChallengeHistoryRow[] {

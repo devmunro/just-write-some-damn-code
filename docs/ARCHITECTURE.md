@@ -1,51 +1,61 @@
-# Architecture
+# V1 architecture
 
-## Product Loop
+## Product loop
 
-The MVP implements one loop:
+1. Browse the built-in original DSA curriculum or one of the single-file build briefs.
+2. Choose a language and write a solution in Monaco. No solution or starter code is shipped.
+3. Optionally run the public examples in the desktop container sandbox.
+4. Optionally ask local Ollama for a fresh variant or qualitative feedback.
+5. Keep the latest draft and exercise status on this device.
 
-1. Choose a practice category.
-2. Generate a challenge through Ollama.
-3. Write or paste a submission.
-4. Ask for feedback.
-5. Repeat.
+## Main modules
 
-The AI is deliberately constrained to challenge-setting and review. Prompt builders explicitly reject complete solutions, starter code, replacement implementations, and answer keys.
+- `src/lib/practice/catalog.ts` holds the authored curriculum and JSON examples.
+- `src/lib/practice/repository.ts` stores drafts, progress, editor preferences, and Ollama settings in SQLite, with localStorage for browser-only development.
+- `src/lib/components/CodeEditor.svelte` configures Monaco for syntax assistance only. Suggestions and inline completions are disabled; indentation and closing pairs are user preferences saved per language.
+- `src/lib/ai` builds strict JSON prompts, validates generated examples and feedback, and talks only to local Ollama loopback endpoints.
+- `src-tauri/src/lib.rs` provides SQLite migrations, local Ollama commands, sandbox status, one-time runner setup, and code execution.
+- `src-tauri/runner` builds a local container image containing Python, Node/TypeScript, and PHP harnesses.
 
-## Folder Structure
+## Data migration
 
-- `src/lib/domain` contains shared product types.
-- `src/lib/challenges` contains curated challenge seeds and seed selection.
-- `src/lib/ai` contains prompt construction and the Ollama provider boundary.
-- `src/lib/history` contains the SQLite repository and the pure persistence mapper.
-- `src/lib/settings` contains local settings persistence.
-- `src/lib/components` contains reusable Svelte UI pieces.
-- `src/routes` contains the SvelteKit route shell.
-- `src-tauri` contains the Tauri v2 host, SQL plugin wiring, and the Ollama command.
-
-## Data Policy
-
-The SQLite MVP schema is intentionally small:
+The existing `challenge_history` table stays intact. SQLite migration version 2 adds:
 
 ```sql
-CREATE TABLE challenge_history (
-  id TEXT PRIMARY KEY,
-  challenge_text TEXT NOT NULL,
-  created_at TEXT NOT NULL
+CREATE TABLE exercise_progress (
+  exercise_id TEXT PRIMARY KEY,
+  status TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE exercise_drafts (
+  exercise_id TEXT NOT NULL,
+  language TEXT NOT NULL,
+  source TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (exercise_id, language)
+);
+
+CREATE TABLE app_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
 );
 ```
 
-No submission text, feedback text, weakness analytics, streaks, or gamification data is persisted.
+The old browser settings key is migrated to the local settings shape. Gemini provider and API-key fields are discarded. New feedback and generated variants remain session-only.
 
-## AI Boundary
+## Run protocol
 
-The frontend calls:
+Every runnable brief has `solve(input) -> JSON` and public JSON cases. The Rust command validates the language, source and case sizes, then packages only those values into an in-memory tar stream. It does not create a host-side source file.
 
-- `generateChallenge(category, recentHistory, settings)`
-- `reviewSubmission(challenge, submission, settings)`
+The app setup action builds `jwsdc-runner:1.0.0`. A run starts that image with networking disabled, read-only root, a temporary workspace, no extra capabilities, a non-root UID, PID/CPU/memory/output limits, and a four second wall-clock timeout. The runner process is killed and its named container is removed if it times out or exceeds output limits. AI responses are never passed to this command.
 
-In a Tauri runtime those functions call the Rust `ollama_chat` command, which talks to `/api/chat`. In a browser-only dev runtime they fall back to `fetch` so the interface can still be exercised outside the desktop shell when CORS allows it.
+## Content and licensing
 
-## Development Fallbacks
+The exercise set is independently authored and uses only broad topic coverage from public practice collections. The app links externally to the NeetCode 250 and LeetCode Top Interview 150 pages. It does not scrape, redistribute, or claim affiliation with those collections.
 
-Browser-only Vite sessions do not have access to Tauri plugins. The history repository therefore uses SQLite inside Tauri and a small `localStorage` fallback during browser-only development. Both paths use the same `ChallengeHistoryRow` shape and store only challenge text plus creation date.
+## Later versions
+
+- V2 adds multi-file workspaces while keeping local drafts.
+- V3 adds local server tasks and networking only when the task explicitly requests it.
+- V4 adds integrated mock or local-service builds.

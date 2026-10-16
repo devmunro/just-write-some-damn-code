@@ -1,171 +1,77 @@
-import { chooseSeed } from '$lib/challenges/seeds';
-import type {
-  Challenge,
-  ChallengeSeed,
-  DsaSubcategory,
-  Feedback,
-  OllamaSettings,
-  PracticeCategory
-} from '$lib/domain/types';
+import type { Exercise, Feedback, GeneratedVariant, JsonValue, OllamaSettings } from '$lib/domain/types';
+import { isLocalOllamaUrl } from '$lib/practice/repository';
 
-type OllamaMessage = {
-  role: 'system' | 'user';
-  content: string;
-};
+export type OllamaMessage = { role: 'system' | 'user'; content: string };
 
-/**
- * Builds the challenge-generation contract sent to the model.
- *
- * The guardrails are intentionally explicit: this app is a practice gym, so
- * model output should frame work without doing that work for the user.
- */
-export function buildChallengePrompt(
-  category: PracticeCategory,
-  recentChallengeText: string[],
-  options: {
-    seed?: ChallengeSeed;
-    dsaSubcategory?: DsaSubcategory;
-  } = {}
-): OllamaMessage[] {
-  const seed = options.seed ?? chooseSeed(category, recentChallengeText, { dsaSubcategory: options.dsaSubcategory });
-  const recent = recentChallengeText.length
-    ? recentChallengeText.map((text, index) => `${index + 1}. ${text}`).join('\n\n')
-    : 'No recent challenges yet.';
-
+export function buildVariantPrompt(exercise: Exercise): OllamaMessage[] {
   return [
-    {
-      role: 'system',
-      content:
-        'You create deliberate software practice challenges. You do not provide solutions, implementation steps, starter code, or answer keys. Return strict JSON only.'
-    },
-    {
-      role: 'user',
-      content: `Create one realistic engineering practice challenge.
-
-Category: ${category}
-${seed.subcategory ? `DSA subtype: ${seed.subcategory}` : ''}
-Seed title: ${seed.title}
-Seed scenario: ${seed.scenario}
-Concepts to practice: ${seed.concepts.join(', ')}
-Difficulty: ${seed.difficulty}
-
-Recent challenge history to avoid repeating:
-${recent}
-
-Avoid generic tutorial projects, especially todo apps, weather apps, and calculators, unless explicitly requested by the user.
-
-Return JSON with this exact shape:
-{
-  "title": "short title",
-  "description": "one or two paragraphs",
-  "requirements": ["clear requirement"],
-  "constraints": ["realistic constraint"],
-  "stretchGoals": ["optional stretch goal"]
-}`
-    }
+    { role: 'system', content: 'Create a new original coding exercise variant. Do not give a solution, code, pseudocode, starter implementation, answer key, or hidden solution field. Use strict JSON only.' },
+    { role: 'user', content: `Create a variant of this practice exercise. Keep the same underlying concept and JSON solve(input) contract, but use a fresh context and examples. The app will label the result AI-generated.\nBase topic: ${exercise.topic}\nDifficulty: ${exercise.difficulty}\nBase prompt: ${exercise.prompt}\nConstraints: ${exercise.constraints.join('; ')}\nDo not quote or reproduce an external problem statement.\nReturn exactly this shape: {"title":"...","prompt":"...","tags":["..."],"constraints":["..."],"examples":[{"label":"Example 1","input":{},"expectedOutput":{}}]}. Include 2 or 3 valid examples.` }
   ];
 }
 
-/**
- * Builds the feedback contract. The model can be direct and useful, but it must
- * leave the next implementation move to the developer.
- */
-export function buildFeedbackPrompt(challenge: Challenge, submission: string): OllamaMessage[] {
+export function buildExerciseFeedbackPrompt(exercise: Exercise, source: string): OllamaMessage[] {
   return [
-    {
-      role: 'system',
-      content: [
-        'You review developer practice submissions.',
-        'Only make claims that are directly supported by the submission text.',
-        'Do not infer completed work, architecture quality, correctness, robustness, or trade-offs unless the submission clearly shows them.',
-        'If the submission is too small, vague, or mostly placeholder text, say so plainly in the weaknesses and suggestions.',
-        'Never write a complete solution, replacement implementation, or full answer key.',
-        'Return strict JSON only.'
-      ].join(' ')
-    },
-    {
-      role: 'user',
-      content: `Review this practice submission.
-
-Challenge:
-${formatChallengeForPrompt(challenge)}
-
-Submission:
-${submission}
-
-Return JSON with this exact shape:
-{
-  "strengths": ["what was done well"],
-  "weaknesses": ["what could be improved"],
-  "suggestions": ["specific improvement to try next"],
-  "followUpQuestions": ["question that encourages deeper thinking"]
-}
-
-For every item you produce, tie it to evidence from the submission.
-If the submission does not contain enough information to judge a category, say that directly instead of guessing.
-Do not provide a complete solution. If the submission is incomplete, focus on feedback and next thinking steps.`
-    }
+    { role: 'system', content: 'Give qualitative, evidence-based coaching on a coding practice submission. Never write a solution, replacement code, pseudocode, or answer key. Do not assign a numerical score or grade. Suggest one useful improvement and an optional next exercise. Return strict JSON only.' },
+    { role: 'user', content: `Exercise: ${exercise.title}\nPrompt: ${exercise.prompt}\nSubmission:\n${source.slice(0, 16000)}\n\nReturn {"strengths":[...],"weaknesses":[...],"suggestions":[...],"followUpQuestions":[...]}. Keep each list short and refer only to evidence in the submission.` }
   ];
-}
-
-export function formatChallengeForPrompt(challenge: Challenge): string {
-  return [
-    `Title: ${challenge.title}`,
-    `Description: ${challenge.description}`,
-    `Requirements: ${challenge.requirements.join('; ')}`,
-    `Constraints: ${challenge.constraints.join('; ')}`,
-    `Stretch goals: ${challenge.stretchGoals.join('; ')}`
-  ].join('\n');
-}
-
-export function challengeToHistoryText(challenge: Challenge): string {
-  return [
-    `# ${challenge.title}`,
-    '',
-    challenge.description,
-    '',
-    'Requirements:',
-    ...challenge.requirements.map((item) => `- ${item}`),
-    '',
-    'Constraints:',
-    ...challenge.constraints.map((item) => `- ${item}`),
-    '',
-    'Stretch goals:',
-    ...challenge.stretchGoals.map((item) => `- ${item}`)
-  ].join('\n');
 }
 
 export function validateSettings(settings: OllamaSettings): string | null {
-  if (!settings.baseUrl.trim()) return 'Add an Ollama base URL first.';
-  if (!settings.model.trim()) return 'Add an Ollama model first.';
+  if (!isLocalOllamaUrl(settings.baseUrl)) return 'Ollama must use a local HTTP address: localhost, 127.0.0.1, or ::1.';
+  if (!settings.model.trim()) return 'Set the name of an installed Ollama model in Settings.';
   return null;
 }
 
-export function normalizeChallenge(value: Partial<Challenge>): Challenge {
-  return {
-    title: coerceText(value.title, 'Untitled practice challenge'),
-    description: coerceText(value.description, 'Practice the requested category with realistic constraints.'),
-    requirements: coerceList(value.requirements, ['Define the intended behavior clearly.']),
-    constraints: coerceList(value.constraints, ['Do not ask AI to solve the challenge for you.']),
-    stretchGoals: coerceList(value.stretchGoals, ['Explain the trade-offs in your approach.'])
-  };
-}
-
 export function normalizeFeedback(value: Partial<Feedback>): Feedback {
+  const list = (entry: unknown, fallback: string[]) => Array.isArray(entry)
+    ? entry.filter((item): item is string => typeof item === 'string' && item.trim().length > 0).map((item) => item.trim()).slice(0, 5)
+    : fallback;
   return {
-    strengths: coerceList(value.strengths, ['You submitted work for review.']),
-    weaknesses: coerceList(value.weaknesses, ['The review could not identify detailed weaknesses.']),
-    suggestions: coerceList(value.suggestions, ['Try clarifying assumptions and edge cases.']),
-    followUpQuestions: coerceList(value.followUpQuestions, ['What trade-off did you intentionally choose?'])
+    strengths: list(value.strengths, ['The review could not identify a specific strength.']),
+    weaknesses: list(value.weaknesses, ['The review could not identify a specific weakness.']),
+    suggestions: list(value.suggestions, ['Try one focused improvement and run the examples again.']),
+    followUpQuestions: list(value.followUpQuestions, ['What input would help you check this behavior?'])
   };
 }
 
-function coerceText(value: unknown, fallback: string): string {
-  return typeof value === 'string' && value.trim() ? value.trim() : fallback;
+export function normalizeGeneratedVariant(value: unknown, base: Exercise): GeneratedVariant {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Ollama returned an invalid variant object.');
+  const raw = value as Record<string, unknown>;
+  if (hasForbiddenAnswerField(raw)) throw new Error('The generated response included solution material. Try again.');
+  const title = text(raw.title, 100);
+  const prompt = text(raw.prompt, 4000);
+  const tags = stringList(raw.tags, 8);
+  const constraints = stringList(raw.constraints, 8);
+  if (!Array.isArray(raw.examples) || raw.examples.length < 2 || raw.examples.length > 3) throw new Error('The generated variant needs two or three examples.');
+  const examples = raw.examples.map((entry, index) => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) throw new Error(`Example ${index + 1} is invalid.`);
+    const example = entry as Record<string, unknown>;
+    if (!('input' in example) || !('expectedOutput' in example) || !isJsonValue(example.input) || !isJsonValue(example.expectedOutput)) throw new Error(`Example ${index + 1} must contain valid JSON input and output.`);
+    return { id: `variant-${index + 1}`, label: typeof example.label === 'string' ? example.label.slice(0, 50) : `Example ${index + 1}`, input: example.input as JsonValue, expectedOutput: example.expectedOutput as JsonValue };
+  });
+  const id = `variant-${crypto.randomUUID()}`;
+  return { id, kind: base.kind, topic: base.topic, title, difficulty: base.difficulty, tags, prompt, constraints, examples, estimatedMinutes: base.estimatedMinutes, generatedBy: 'ollama', generatedAt: new Date().toISOString(), sourceExerciseId: base.id };
 }
 
-function coerceList(value: unknown, fallback: string[]): string[] {
-  if (!Array.isArray(value)) return fallback;
-  const items = value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
-  return items.length ? items.map((item) => item.trim()) : fallback;
+function text(value: unknown, max: number): string {
+  if (typeof value !== 'string' || !value.trim() || value.length > max) throw new Error('The generated exercise text is missing or too long.');
+  return value.trim();
+}
+function stringList(value: unknown, maxItems: number): string[] {
+  if (!Array.isArray(value) || value.length < 1 || value.length > maxItems || value.some((item) => typeof item !== 'string' || !item.trim() || item.length > 300)) throw new Error('The generated tags or constraints are invalid.');
+  return value.map((item) => (item as string).trim());
+}
+function isJsonValue(value: unknown, depth = 0): boolean {
+  if (depth > 20) return false;
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return typeof value !== 'string' || value.length <= 20_000;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (Array.isArray(value)) return value.length <= 2_000 && value.every((entry) => isJsonValue(entry, depth + 1));
+  if (typeof value === 'object') return Object.keys(value as object).length <= 200 && Object.entries(value as Record<string, unknown>).every(([key, entry]) => key.length <= 200 && isJsonValue(entry, depth + 1));
+  return false;
+}
+function hasForbiddenAnswerField(value: unknown, depth = 0): boolean {
+  if (depth > 20 || !value || typeof value !== 'object') return false;
+  if (Array.isArray(value)) return value.some((entry) => hasForbiddenAnswerField(entry, depth + 1));
+  return Object.entries(value as Record<string, unknown>).some(([key, entry]) => /^(solution|answer|answerkey|startercode|implementation|pseudocode)$/i.test(key.replace(/[^a-z]/gi, '')) || hasForbiddenAnswerField(entry, depth + 1));
 }

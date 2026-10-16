@@ -1,49 +1,95 @@
-/**
- * Shared domain contracts for the practice loop.
- *
- * These types intentionally avoid provider-specific fields so the UI can stay
- * stable when another AI provider is added after the Ollama MVP.
- */
-export const PRACTICE_CATEGORIES = [
-  'Build',
-  'LeetCode / DSA',
-  'Frontend',
-  'Backend',
-  'Debugging',
-  'Refactoring',
-  'System Design',
-  'Architecture',
-  'Database Design',
-  'Security',
-  'Technical Interview Practice'
-] as const;
-
-export type PracticeCategory = (typeof PRACTICE_CATEGORIES)[number];
-
-export const DSA_SUBCATEGORIES = [
-  'Arrays & Strings',
-  'Hash Maps',
+export const DSA_TOPICS = [
+  'Arrays & Hashing',
   'Two Pointers',
   'Sliding Window',
-  'Stack & Queue',
+  'Binary Search',
+  'Stacks & Queues',
   'Linked Lists',
-  'Trees',
-  'Graphs',
+  'Trees & Tries',
   'Heaps',
-  'Dynamic Programming',
+  'Graphs',
   'Backtracking',
+  'Dynamic Programming',
+  'Greedy',
   'Intervals',
-  'Greedy'
+  'Bit Manipulation',
+  'Math & Geometry'
 ] as const;
 
-export type DsaSubcategory = (typeof DSA_SUBCATEGORIES)[number];
+export type DsaTopic = (typeof DSA_TOPICS)[number];
+export type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced';
+export type PracticeLanguage = 'python' | 'javascript' | 'typescript' | 'php';
+export type ExerciseKind = 'dsa' | 'build';
+export type ExerciseStatus = 'not-started' | 'in-progress' | 'done';
+export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
 
-export type Challenge = {
+export type ExampleCase = {
+  id: string;
+  label: string;
+  input: JsonValue;
+  expectedOutput: JsonValue;
+};
+
+export type Exercise = {
+  id: string;
+  kind: ExerciseKind;
+  topic: DsaTopic | 'Single-file builds';
   title: string;
-  description: string;
-  requirements: string[];
+  difficulty: Difficulty;
+  tags: string[];
+  prompt: string;
   constraints: string[];
-  stretchGoals: string[];
+  examples: ExampleCase[];
+  estimatedMinutes: number;
+};
+
+export type RunRequest = {
+  exerciseId: string;
+  language: PracticeLanguage;
+  source: string;
+  cases: ExampleCase[];
+};
+
+export type RunCaseResult = {
+  id: string;
+  label: string;
+  passed: boolean;
+  actualOutput?: JsonValue;
+  error?: string;
+};
+
+export type RunResult = {
+  status: 'passed' | 'failed' | 'error' | 'timeout' | 'unavailable';
+  cases: RunCaseResult[];
+  stdout: string;
+  stderr: string;
+  durationMs: number;
+  message?: string;
+};
+
+export type EditorPreferences = {
+  autoIndent: boolean;
+  autoCloseBrackets: boolean;
+  autoCloseQuotes: boolean;
+};
+
+export type EditorPreferencesByLanguage = Record<PracticeLanguage, EditorPreferences>;
+
+export type PracticeProgress = {
+  exerciseId: string;
+  status: ExerciseStatus;
+  updatedAt: string;
+};
+
+export type GeneratedVariant = Exercise & {
+  generatedBy: 'ollama';
+  generatedAt: string;
+  sourceExerciseId: string;
+};
+
+export type OllamaSettings = {
+  baseUrl: string;
+  model: string;
 };
 
 export type Feedback = {
@@ -59,19 +105,3 @@ export type ChallengeHistoryItem = {
   createdAt: string;
 };
 
-export type OllamaSettings = {
-  provider: 'ollama' | 'gemini';
-  baseUrl: string;
-  apiKey: string;
-  model: string;
-};
-
-export type AIProvider = OllamaSettings['provider'];
-
-export type ChallengeSeed = {
-  title: string;
-  scenario: string;
-  concepts: string[];
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-  subcategory?: DsaSubcategory;
-};

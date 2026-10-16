@@ -1,78 +1,53 @@
 <script lang="ts">
   import { CheckCircle2 } from '@lucide/svelte';
   import Drawer from '$lib/components/Drawer.svelte';
-  import { defaultSettings, GEMINI_BASE_URL, OLLAMA_BASE_URL } from '$lib/settings/persistence';
-  import { modelsForProvider, providerOptions } from '$lib/ai/models';
-  import type { AIProvider, OllamaSettings } from '$lib/domain/types';
+  import type { OllamaSettings } from '$lib/domain/types';
+  import { isLocalOllamaUrl } from '$lib/practice/repository';
+  import { checkOllama } from '$lib/ai/ollama';
 
   export let settings: OllamaSettings;
   export let onClose: () => void;
   export let onSave: (settings: OllamaSettings) => void;
-
   let draft = { ...settings };
-  $: modelList = modelsForProvider(draft.provider);
+  let availableModels: string[] = [];
+  let checking = false;
+  let connectionError = '';
+  $: valid = isLocalOllamaUrl(draft.baseUrl) && draft.model.trim().length > 0;
 
-  function setProvider(provider: AIProvider) {
-    draft = {
-      ...draft,
-      provider,
-      model: '',
-      apiKey: provider === 'gemini' ? draft.apiKey : '',
-      baseUrl: provider === 'gemini' ? GEMINI_BASE_URL : OLLAMA_BASE_URL
-    };
+  async function findModels() {
+    checking = true;
+    connectionError = '';
+    try {
+      availableModels = await checkOllama({ ...draft, model: draft.model || 'local-check' });
+      if (!availableModels.length) connectionError = 'Ollama is reachable, but no models are installed yet.';
+      else if (!availableModels.includes(draft.model)) draft.model = availableModels[0];
+    } catch (cause) { connectionError = cause instanceof Error ? cause.message : String(cause); }
+    finally { checking = false; }
   }
 
   function save() {
-    onSave({
-      provider: draft.provider,
-      baseUrl:
-        draft.provider === 'gemini'
-          ? GEMINI_BASE_URL
-          : draft.baseUrl.trim() || defaultSettings.baseUrl,
-      apiKey: draft.apiKey.trim(),
-      model: draft.model.trim()
-    });
+    if (valid) onSave({ baseUrl: draft.baseUrl.trim(), model: draft.model.trim() });
   }
 </script>
 
-<Drawer title="Settings" {onClose}>
+<Drawer title="Local AI settings" {onClose}>
   <div class="space-y-4">
+    <p class="text-sm text-steel">AI requests go only to an Ollama service running on this computer. AI is optional; challenges, editing, and local saving work without it.</p>
     <label class="block">
-      <span class="mb-1 block text-sm font-semibold">Provider</span>
-      <select class="field" bind:value={draft.provider} on:change={(event) => setProvider((event.currentTarget as HTMLSelectElement).value as AIProvider)}>
-        {#each providerOptions as option}
-          <option value={option.value}>{option.label}</option>
-        {/each}
-      </select>
+      <span class="mb-1 block text-sm font-semibold">Ollama local URL</span>
+      <input class="field" bind:value={draft.baseUrl} placeholder="http://localhost:11434" />
     </label>
-
-    {#if draft.provider === 'gemini'}
-      <label class="block">
-        <span class="mb-1 block text-sm font-semibold">Gemini API key</span>
-        <input class="field" bind:value={draft.apiKey} placeholder="Paste your Gemini API key here" type="password" />
-      </label>
-      <p class="text-xs text-steel">
-        Antigravity Agent Preview is listed in the model menu for visibility, but it is not a good fit for this app's strict JSON review flow yet.
-      </p>
-    {:else}
-      <label class="block">
-        <span class="mb-1 block text-sm font-semibold">Ollama base URL</span>
-        <input class="field" bind:value={draft.baseUrl} placeholder="http://localhost:11434" />
-      </label>
-    {/if}
-
     <label class="block">
-      <span class="mb-1 block text-sm font-semibold">Model</span>
-      <select class="field" bind:value={draft.model}>
-        <option value="" disabled>Select a model</option>
-        {#each modelList as option}
-          <option value={option.value}>{option.label}</option>
-        {/each}
-      </select>
+      <span class="mb-1 block text-sm font-semibold">Installed model name</span>
+      {#if availableModels.length}
+        <select class="field" bind:value={draft.model}>{#each availableModels as model}<option value={model}>{model}</option>{/each}</select>
+      {:else}
+        <input class="field" bind:value={draft.model} placeholder="e.g. llama3.1:8b" />
+      {/if}
     </label>
-    <button class="primary-button" type="button" on:click={save}>
-      <CheckCircle2 size={16} />
-      Save
-    </button>
+    <button class="text-button" type="button" disabled={checking || !isLocalOllamaUrl(draft.baseUrl)} on:click={findModels}>{#if checking}<span class="spin">◌</span>{:else}Find installed models{/if}</button>
+    {#if connectionError}<p class="text-sm text-amber-200">{connectionError}</p>{/if}
+    {#if !isLocalOllamaUrl(draft.baseUrl)}<p class="text-sm text-red-300">Use localhost, 127.0.0.1, or ::1 over HTTP.</p>{/if}
+    <button class="primary-button" type="button" disabled={!valid} on:click={save}><CheckCircle2 size={16} />Save local settings</button>
   </div>
 </Drawer>
