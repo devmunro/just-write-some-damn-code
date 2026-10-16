@@ -318,7 +318,6 @@
           {/each}
         </div>
       </div>
-      <div class="sidebar-footnote"><span class="no-ai-mark"><X size={11} /></span> Just you and the code.</div>
     </aside>
 
     <section class="editor-pane" aria-label="Code editor and runner">
@@ -343,7 +342,15 @@
               <label><span>Auto indentation</span><input type="checkbox" checked={currentPreferences.autoIndent} on:change={() => changePreference('autoIndent')} /></label>
               <label><span>Close brackets</span><input type="checkbox" checked={currentPreferences.autoCloseBrackets} on:change={() => changePreference('autoCloseBrackets')} /></label>
               <label><span>Close quotes</span><input type="checkbox" checked={currentPreferences.autoCloseQuotes} on:change={() => changePreference('autoCloseQuotes')} /></label>
-              <p>Indentation and closing pairs only. Suggestions stay off. Hold Ctrl and scroll over the code space to zoom its text.</p>
+              <p>Indentation and closing pairs only. Suggestions stay off.</p>
+              <div class="shortcut-list" aria-label="Code space shortcuts">
+                <div class="shortcut-heading">CODE SPACE SHORTCUTS</div>
+                <div class="shortcut-row"><kbd>Ctrl + Enter</kbd><span>Run examples</span></div>
+                <div class="shortcut-row"><kbd>Ctrl + scroll</kbd><span>Zoom code text</span></div>
+                <div class="shortcut-row"><kbd>Ctrl + F</kbd><span>Find in code</span></div>
+                <div class="shortcut-row"><kbd>Ctrl + Z</kbd><span>Undo</span></div>
+                <div class="shortcut-row"><kbd>Ctrl + Shift + Z</kbd><span>Redo</span></div>
+              </div>
             </div>{/if}
           </div>
           <button class="review-button" disabled={isReviewing || !submission.trim()} on:click={requestFeedback} title="Ask local Ollama for qualitative feedback">{#if isReviewing}<Loader2 class="spin" size={14} />{:else}<Sparkles size={14} />{/if}<span>Feedback</span></button>
@@ -362,19 +369,20 @@
         <div class="runner-header"><div class="runner-title"><Terminal size={16} /><strong>Local runner</strong><span class="runner-tag">Sandboxed</span></div><div class="runner-engine">{#if sandbox.engine}{sandbox.engine}{:else}Engine not detected{/if}</div></div>
         {#if result}
           <div class="run-result" class:result-pass={result.status === 'passed'} class:result-fail={result.status !== 'passed'}>
-            <div class="result-summary"><span class="result-symbol">{#if result.status === 'passed'}<CheckCircle2 size={16} />{:else}<X size={16} />{/if}</span><strong>{result.status === 'passed' ? 'Examples passed' : result.status === 'timeout' ? 'Run timed out' : result.status === 'error' ? 'Run error' : 'Some examples failed'}</strong><span>{result.cases.filter((item) => item.passed).length} of {result.cases.length} examples passed</span><span class="result-duration">{result.durationMs} ms</span></div>
+            <div class="result-summary"><span class="result-symbol">{#if result.status === 'passed'}<CheckCircle2 size={16} />{:else}<X size={16} />{/if}</span><strong>{result.status === 'passed' ? 'Examples passed' : result.status === 'timeout' ? 'Run timed out' : result.status === 'error' ? 'Run error' : 'Some examples failed'}</strong><span>{result.cases.filter((item) => item.passed).length} of {result.cases.length} examples passed</span><span class="result-duration">{result.durationMs} ms</span><button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button></div>
             {#if result.message}<p class="result-message">{result.message}</p>{/if}
             {#if result.cases.length}<div class="case-results">{#each result.cases as item}<div class="case-result"><span class:case-pass={item.passed} class:case-fail={!item.passed}>{#if item.passed}<Check size={12} />{:else}<X size={12} />{/if}</span><span>{item.label}</span>{#if item.error}<code>{item.error}</code>{:else if !item.passed}<span class="case-actual">Got {pretty(item.actualOutput)}</span>{/if}</div>{/each}</div>{/if}
             {#if result.stderr}<pre class="runner-stderr">{result.stderr}</pre>{/if}
           </div>
         {:else if !sandbox.imageAvailable}
-          <div class="runner-not-ready"><div class="runner-not-ready-icon"><FlaskConical size={18} /></div><div><strong>{sandbox.engine ? 'One-time runner setup' : 'No container engine found'}</strong><p>{#if sandbox.engine}Build the local {sandbox.imageTag} image. This needs network access once.{:else}The editor works without one. Install <a href="https://podman.io/docs/installation" target="_blank" rel="noreferrer">Podman</a> or <a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noreferrer">Docker</a> to run your code.{/if}</p></div>
+          <div class="runner-not-ready"><div class="runner-not-ready-icon"><FlaskConical size={18} /></div><div class="runner-not-ready-copy"><div class="runner-not-ready-heading"><strong>{sandbox.engine ? 'One-time runner setup' : 'No container engine found'}</strong><div class="runner-actions">
             {#if sandbox.engine}<button class="setup-button" disabled={isSettingUp} on:click={setupSandbox}>{#if isSettingUp}<Loader2 class="spin" size={14} />{:else}<span class="download-glyph">↓</span>{/if}{isSettingUp ? 'Setting up' : 'Set up runner'}</button>{/if}
+            <button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button>
+          </div></div><p>{#if sandbox.engine}Build the local {sandbox.imageTag} image. This needs network access once.{:else}The editor works without one. Install <a href="https://podman.io/docs/installation" target="_blank" rel="noreferrer">Podman</a> or <a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noreferrer">Docker</a> to run your code.{/if}</p></div>
           </div>
         {:else}
-          <div class="runner-empty"><Circle size={13} /><span>Run your code against the public examples. No network access inside the runner.</span></div>
+          <div class="runner-empty"><Circle size={13} /><span>Run your code against the public examples. No network access inside the runner.</span><button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button></div>
         {/if}
-        <div class="runner-footer"><span><span class="local-lock">●</span> Code stays on this device</span><button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl ↵</kbd></button></div>
       </div>
     </section>
   </main>
