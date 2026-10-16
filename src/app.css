@@ -33,9 +33,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .brand-mark { width: 33px; height: 33px; display: grid; place-items: center; border: 1px solid #39624e; border-radius: 9px; color: var(--green); background: #1c2a22; }
 .brand-name { font-size: 10px; font-weight: 800; letter-spacing: .09em; color: #f0f1ed; }
 .brand-subtitle { margin-top: 3px; color: #87918a; font-size: 10px; letter-spacing: .025em; }
-.topbar-center { display: flex; align-items: center; gap: 9px; color: #a2aaa3; font-size: 10px; letter-spacing: .07em; text-transform: uppercase; }
-.live-dot { width: 6px; height: 6px; background: #78d3a6; border-radius: 50%; box-shadow: 0 0 8px rgba(120,211,166,.5); }
-.topbar-divider { width: 1px; height: 13px; background: #363b37; margin: 0 4px; }
 .topbar-actions { min-width: 270px; display: flex; justify-content: flex-end; gap: 8px; }
 .quiet-button { height: 33px; border: 1px solid transparent; border-radius: 6px; padding: 0 10px; display: inline-flex; align-items: center; gap: 7px; color: #b5bcb6; background: transparent; font-size: 11px; transition: .15s ease; }
 .quiet-button:hover { background: #222624; border-color: #313833; color: #e7ece8; }
@@ -219,7 +216,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
   html, body { overflow: auto; }
   .app-shell { height: auto; min-height: 100vh; }
   .topbar { position: sticky; top: 0; z-index: 15; }
-  .topbar-center { display: none; }
   .workspace-grid { min-height: 1200px; grid-template-columns: 200px minmax(300px, 1fr); grid-template-rows: minmax(450px, auto) 620px; }
   .sidebar { grid-row: 1 / span 2; }
   .challenge-pane { border-right: 0; }
@@ -270,7 +266,6 @@ html, body { background: #000; }
 .brand-damn { display: inline-block; padding: 3px 7px 2px; color: #080808; background: #ff5747; font-size: 22px; font-weight: 1000; letter-spacing: -.04em; line-height: .95; transform: rotate(-3deg) skew(-5deg); }
 .brand-code { display: inline-block; color: #f0f1ec; font-size: 22px; font-weight: 1000; letter-spacing: -.1em; transform: rotate(2deg); }
 .brand-shout { display: inline-block; color: #caff48; font-size: 30px; font-weight: 1000; line-height: .8; transform: rotate(9deg) translateY(-2px); }
-.topbar-center { gap: 8px; font-size: 9px; color: #8b918c; }
 .topbar-actions { min-width: auto; }
 .workspace-grid { grid-template-columns: 254px minmax(0, 1fr); background: #000; }
 .sidebar { background: #000; border-right-color: #202020; }
@@ -399,7 +394,6 @@ html, body { background: #000; }
   html, body { height: 100%; overflow: hidden; }
   .app-shell { height: 100dvh; min-height: 0; }
   .topbar { position: static; }
-  .topbar-center { display: flex; }
   .workspace-grid { min-height: 0; grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
   .sidebar { grid-row: auto; }
   .editor-pane { grid-column: auto; min-height: 0; }
@@ -409,7 +403,6 @@ html, body { background: #000; }
   .topbar { height: 48px; flex-basis: 48px; padding: 0 9px; }
   .brand-mark { width: 27px; height: 27px; }
   .brand-name { font-size: 9px; letter-spacing: .045em; }
-  .topbar-center { display: none; }
   .topbar-actions { gap: 0; }
   .quiet-button { padding: 0 7px; }
   .quiet-button span { display: none; }
