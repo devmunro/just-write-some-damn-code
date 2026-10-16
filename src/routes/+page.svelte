@@ -335,7 +335,7 @@
       {/if}
 
       <div class="editor-toolbar">
-        <div class="file-tab"><span class="file-dot" class:file-python={editorLanguage === 'python'} class:file-php={editorLanguage === 'php'}>{#if editorLanguage === 'python'}Py{:else if editorLanguage === 'php'}Php{:else}JS{/if}</span><span>{editorLanguages.find((item) => item.value === editorLanguage)?.label}</span><span class="tab-file-name">main.{editorLanguage === 'javascript' ? 'js' : editorLanguage === 'typescript' ? 'ts' : editorLanguage === 'python' ? 'py' : 'php'}</span><span class="dirty-indicator" title="Draft saved locally"></span></div>
+        <div class="file-tab" title="Code space. Hold Ctrl and scroll to zoom the code text."><span class="file-dot" class:file-python={editorLanguage === 'python'} class:file-php={editorLanguage === 'php'}>{#if editorLanguage === 'python'}Py{:else if editorLanguage === 'php'}Php{:else}JS{/if}</span><span>Code space</span><span class="tab-file-name">main.{editorLanguage === 'javascript' ? 'js' : editorLanguage === 'typescript' ? 'ts' : editorLanguage === 'python' ? 'py' : 'php'}</span><span class="dirty-indicator" title="Draft saved locally"></span></div>
         <div class="editor-actions">
           <label class="language-select-label"><span class="sr-only">Programming language</span><select value={editorLanguage} on:change={changeLanguage}>{#each editorLanguages as language}<option value={language.value}>{language.label}</option>{/each}</select><ChevronDown size={13} /></label>
           <div class="options-anchor"><button class="icon-quiet" title="Editor behavior" aria-expanded={showEditorOptions} on:click={() => (showEditorOptions = !showEditorOptions)}><Settings2 size={16} /></button>
@@ -343,16 +343,16 @@
               <label><span>Auto indentation</span><input type="checkbox" checked={currentPreferences.autoIndent} on:change={() => changePreference('autoIndent')} /></label>
               <label><span>Close brackets</span><input type="checkbox" checked={currentPreferences.autoCloseBrackets} on:change={() => changePreference('autoCloseBrackets')} /></label>
               <label><span>Close quotes</span><input type="checkbox" checked={currentPreferences.autoCloseQuotes} on:change={() => changePreference('autoCloseQuotes')} /></label>
-              <p>Indentation and closing pairs only. Suggestions stay off.</p>
+              <p>Indentation and closing pairs only. Suggestions stay off. Hold Ctrl and scroll over the code space to zoom its text.</p>
             </div>{/if}
           </div>
           <button class="review-button" disabled={isReviewing || !submission.trim()} on:click={requestFeedback} title="Ask local Ollama for qualitative feedback">{#if isReviewing}<Loader2 class="spin" size={14} />{:else}<Sparkles size={14} />{/if}<span>Feedback</span></button>
         </div>
       </div>
 
-      <div class="editor-surface">
+      <div class="editor-surface" role="region" aria-label="Code space">
         <CodeEditor bind:value={submission} language={editorLanguage} preferences={currentPreferences} on:input={(event) => handleEditorInput((event as CustomEvent<string>).detail)} />
-        {#if !submission}<div class="editor-placeholder"><span>1</span><span>Write the code. Figure it out as you go.</span></div>{/if}
+        {#if !submission}<div class="editor-placeholder"><span>1</span><span>Code space — write the code. Figure it out as you go.</span></div>{/if}
       </div>
 
       {#if error}<div class="message-banner error-banner"><X size={15} /><span>{error}</span><button on:click={() => (error = '')} aria-label="Dismiss error"><X size={13} /></button></div>{/if}

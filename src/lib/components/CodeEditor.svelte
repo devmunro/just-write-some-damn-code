@@ -80,6 +80,8 @@
       language,
       automaticLayout: true,
       fontSize: 15,
+      mouseWheelZoom: true,
+      ariaLabel: 'Code space',
       lineHeight: 24,
       minimap: { enabled: false },
       padding: { top: 12, bottom: 12 },
