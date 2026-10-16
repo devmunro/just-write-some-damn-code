@@ -275,7 +275,10 @@
 
 <div class="app-shell">
   <header class="topbar">
-    <div class="brand-lockup"><div class="brand-mark"><Braces size={18} strokeWidth={2.5} /></div><div class="brand-name">JUST WRITE SOME DAMN CODE</div></div>
+    <div class="brand-lockup" role="img" aria-label="Just Write Some Damn Code">
+      <div class="brand-mark" aria-hidden="true"><span>@!#</span></div>
+      <div class="brand-name" aria-hidden="true"><span class="brand-just">juSt</span><span class="brand-write">WRITE</span><span class="brand-some">sOme</span><span class="brand-damn">DAMN</span><span class="brand-code">cODe</span><span class="brand-shout">!</span></div>
+    </div>
     <div class="topbar-center"><span class="live-dot"></span><span>LOCAL</span><span class="topbar-divider"></span><span>{doneCount} DONE</span></div>
     <div class="topbar-actions">
       <button class="quiet-button" on:click={openHistory} aria-label="Open saved history"><History size={16} /><span>History</span></button>

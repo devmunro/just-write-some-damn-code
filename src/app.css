@@ -259,10 +259,17 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 
 html, body { background: #000; }
 .app-shell { min-height: 0; background: #000; }
-.topbar { height: 54px; flex-basis: 54px; padding: 0 16px; background: #000; border-bottom-color: #202020; }
-.brand-lockup { min-width: auto; gap: 9px; }
-.brand-mark { width: 30px; height: 30px; border-radius: 7px; background: #080d0a; }
-.brand-name { font-size: 16px; letter-spacing: .04em; }
+.topbar { height: 68px; flex-basis: 68px; padding: 0 18px; background: #000; border-bottom-color: #202020; }
+.brand-lockup { min-width: auto; gap: 11px; white-space: nowrap; }
+.brand-mark { width: 42px; height: 40px; flex: 0 0 42px; display: grid; place-items: center; border: 0; border-radius: 0; color: #080808; background: #ff5747; clip-path: polygon(48% 0, 61% 14%, 78% 4%, 80% 22%, 100% 24%, 88% 42%, 100% 57%, 81% 64%, 85% 84%, 64% 80%, 52% 100%, 41% 82%, 21% 94%, 21% 73%, 0 67%, 13% 50%, 0 33%, 21% 28%, 18% 8%, 39% 16%); filter: drop-shadow(0 0 7px rgba(255, 87, 71, .24)); transform: rotate(-7deg); }
+.brand-mark span { font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif; font-size: 14px; font-weight: 1000; letter-spacing: -.12em; line-height: 1; transform: rotate(7deg) scaleX(.9); }
+.brand-name { display: flex; align-items: baseline; gap: 6px; color: #f1f1ec; font-size: 20px; font-weight: 900; letter-spacing: -.06em; line-height: 1; }
+.brand-just { color: #a5aaa4; font-size: 18px; font-weight: 800; letter-spacing: -.08em; transform: rotate(-5deg); }
+.brand-write { display: inline-block; color: #f0f1ec; font-size: 25px; font-weight: 1000; letter-spacing: -.1em; transform: skew(-5deg) rotate(-1deg); }
+.brand-some { display: inline-block; color: #98a19a; font-size: 17px; font-style: italic; font-weight: 800; letter-spacing: -.09em; transform: rotate(3deg); }
+.brand-damn { display: inline-block; padding: 3px 7px 2px; color: #080808; background: #ff5747; font-size: 22px; font-weight: 1000; letter-spacing: -.04em; line-height: .95; transform: rotate(-3deg) skew(-5deg); }
+.brand-code { display: inline-block; color: #f0f1ec; font-size: 22px; font-weight: 1000; letter-spacing: -.1em; transform: rotate(2deg); }
+.brand-shout { display: inline-block; color: #caff48; font-size: 30px; font-weight: 1000; line-height: .8; transform: rotate(9deg) translateY(-2px); }
 .topbar-center { gap: 8px; font-size: 9px; color: #8b918c; }
 .topbar-actions { min-width: auto; }
 .workspace-grid { grid-template-columns: 254px minmax(0, 1fr); background: #000; }
@@ -470,4 +477,22 @@ html, body { background: #000; }
   .example-value { min-height: 0; }
   .prompt-panel { padding: 12px; }
   .prompt-panel p { font-size: 12px; }
+}
+
+@media (max-width: 650px) {
+  .topbar { height: 58px; flex-basis: 58px; padding: 0 9px; }
+  .brand-lockup { gap: 7px; }
+  .brand-mark { width: 32px; height: 30px; flex-basis: 32px; }
+  .brand-mark span { font-size: 11px; }
+  .brand-name { gap: 3px; }
+  .brand-just { font-size: 12px; }
+  .brand-write { font-size: 16px; }
+  .brand-some { font-size: 12px; }
+  .brand-damn { padding: 2px 4px; font-size: 14px; }
+  .brand-code { font-size: 15px; }
+  .brand-shout { font-size: 20px; }
+}
+
+@media (max-width: 390px) {
+  .brand-some { display: none; }
 }
