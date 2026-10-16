@@ -476,7 +476,7 @@ html, body { background: #000; }
 }
 
 /* Sidebar, study links, and clearer action marks */
-.topbar-brand-group { min-width: 0; display: flex; align-items: center; gap: 11px; }
+.topbar-brand-group { min-width: 0; display: flex; align-items: center; gap: 0; }
 .sidebar-toggle { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; border: 1px solid #252925; border-radius: 5px; color: #aab2ab; background: #050505; }
 .sidebar-toggle:hover { border-color: #425046; color: #d9e6dc; background: #0c100d; }
 .brand-mark { width: 50px; height: 48px; flex: 0 0 50px; display: block; overflow: visible; border: 0; border-radius: 0; background: none; clip-path: none; filter: drop-shadow(0 0 7px rgba(255, 87, 71, .22)); transform: none; }
@@ -487,6 +487,13 @@ html, body { background: #000; }
 .workspace-grid.sidebar-collapsed { grid-template-columns: minmax(0, 1fr); }
 .sidebar-collapsed .sidebar { display: none; }
 .sidebar-collapsed .editor-pane { grid-column: 1; }
+.sidebar-switcher { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 34px; }
+.sidebar-switcher .sidebar-toggle { width: 34px; height: 34px; padding: 0; border-color: #252925; border-radius: 5px; color: #aab2ab; background: #050505; }
+.sidebar-switcher .sidebar-toggle:hover { border-color: #425046; color: #d9e6dc; background: #0c100d; }
+.editor-pane { position: relative; }
+.sidebar-reopen { position: absolute; z-index: 5; top: 8px; left: 9px; width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid #303531; border-radius: 5px; color: #b8c2ba; background: #070807; }
+.sidebar-reopen:hover { border-color: #425046; color: #e0e9e2; background: #111512; }
+.sidebar-collapsed .challenge-summary { padding-left: 50px; }
 .sidebar-switcher button { font-size: 12px; }
 .topic-select-wrap { font-size: 9px; }
 .topic-select-control select { font-size: 12px; }
@@ -517,7 +524,6 @@ html, body { background: #000; }
 
 @media (max-width: 650px) {
   .topbar-brand-group { gap: 6px; }
-  .sidebar-toggle { width: 28px; height: 30px; flex-basis: 28px; border: 0; background: transparent; }
   .brand-lockup { gap: 7px; }
   .brand-mark { width: 34px; height: 32px; flex-basis: 34px; }
   .workspace-grid.sidebar-collapsed { display: flex; }

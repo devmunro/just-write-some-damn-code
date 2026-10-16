@@ -288,9 +288,6 @@
 <div class="app-shell">
   <header class="topbar">
     <div class="topbar-brand-group">
-      <button class="sidebar-toggle" on:click={toggleSidebar} aria-label={showSidebar ? 'Hide exercise sidebar' : 'Show exercise sidebar'} title={showSidebar ? 'Hide exercise sidebar' : 'Show exercise sidebar'}>
-        {#if showSidebar}<PanelLeftClose size={18} />{:else}<PanelLeftOpen size={18} />{/if}
-      </button>
       <div class="brand-lockup" role="img" aria-label="Just Write Some Damn Code">
         <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
           <path d="M24 1 L29.5 11 L40.5 7.5 L37 18.5 L47 24 L37 29.5 L40.5 40.5 L29.5 37 L24 47 L18.5 37 L7.5 40.5 L11 29.5 L1 24 L11 18.5 L7.5 7.5 L18.5 11 Z" fill="#ff5747" stroke="#ffae69" stroke-width="1.2" stroke-linejoin="round" />
@@ -315,6 +312,7 @@
       <div class="sidebar-switcher" aria-label="Practice track">
         <button class:active={track === 'dsa'} on:click={() => chooseTrack('dsa')}><Braces size={15} /> DSA</button>
         <button class:active={track === 'build'} on:click={() => chooseTrack('build')}><FileCode2 size={15} /> Build</button>
+        <button class="sidebar-toggle" on:click={toggleSidebar} aria-label="Hide exercise sidebar" title="Hide exercise sidebar"><PanelLeftClose size={17} /></button>
       </div>
 
       {#if track === 'dsa'}
@@ -359,6 +357,7 @@
     </aside>
 
     <section class="editor-pane" aria-label="Code editor and runner">
+      {#if !showSidebar}<button class="sidebar-reopen" on:click={toggleSidebar} aria-label="Show exercise sidebar" title="Show exercise sidebar"><PanelLeftOpen size={17} /></button>{/if}
       {#if selectedExercise}
         <div class="challenge-summary">
           <div class="challenge-summary-top"><h1>{selectedExercise.title}</h1>
