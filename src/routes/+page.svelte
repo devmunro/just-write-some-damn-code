@@ -365,15 +365,13 @@
   <dialog class="details-dialog" bind:this={detailsDialog} aria-labelledby="details-title">
     <div class="details-dialog-header"><div><span class="dialog-eyebrow">CHALLENGE DETAILS</span><h2 id="details-title">{selectedExercise.title}</h2></div><button class="icon-quiet" on:click={closeExerciseDetails} aria-label="Close challenge details"><X size={17} /></button></div>
     <div class="details-dialog-body">
-      <div class="task-breadcrumb"><span>{selectedExercise.topic}</span><span class="crumb-slash">/</span><span>{displayDifficulty(selectedExercise.difficulty)}</span>{#if isGenerated}<span class="ai-generated-badge"><Sparkles size={11} /> AI generated</span>{/if}</div>
-      <div class="task-meta"><span><Clock3 size={13} /> {selectedExercise.estimatedMinutes} min</span><span class="difficulty-pill" class:diff-beginner={selectedExercise.difficulty === 'Beginner'} class:diff-advanced={selectedExercise.difficulty === 'Advanced'}>{displayDifficulty(selectedExercise.difficulty)}</span></div>
-      <div class="tag-row">{#each selectedExercise.tags.slice(0, 4) as tag}<span class="tag-chip">{tag}</span>{/each}</div>
-      <article class="prompt-copy"><p>{selectedExercise.prompt}</p></article>
-      <div class="contract-card"><div class="contract-heading"><Code2 size={14} /><span>FUNCTION CONTRACT</span></div><code>solve(input) → JSON</code><p>Write the function yourself. The runner passes each example as a JSON value.</p></div>
-      <section class="detail-section"><h2><ListFilter size={14} /> Constraints</h2><ul>{#each selectedExercise.constraints as constraint}<li>{constraint}</li>{/each}</ul></section>
-      <section class="detail-section examples-section"><div class="section-header"><h2><BookOpen size={14} /> Examples</h2><span>{selectedExercise.examples.length} public cases</span></div>
+      <div class="details-meta"><span>{selectedExercise.topic}</span><span class="details-meta-divider"></span><span class="details-difficulty">{displayDifficulty(selectedExercise.difficulty)}</span><span class="details-meta-divider"></span><span>{selectedExercise.estimatedMinutes} MIN</span>{#if isGenerated}<span class="ai-generated-badge"><Sparkles size={11} /> AI generated</span>{/if}</div>
+      <section class="prompt-panel" aria-labelledby="prompt-heading"><h3 id="prompt-heading">THE CHALLENGE</h3><p>{selectedExercise.prompt}</p></section>
+      <div class="contract-card"><div class="contract-heading"><Code2 size={14} /><span>WHAT TO WRITE</span></div><code>solve(input) → JSON</code><p>Write the function yourself. The runner passes each example as a JSON value.</p></div>
+      <section class="detail-section constraints-section"><h3><ListFilter size={14} /> CONSTRAINTS</h3><ul>{#each selectedExercise.constraints as constraint}<li>{constraint}</li>{/each}</ul></section>
+      <section class="detail-section examples-section"><div class="section-header"><h3><BookOpen size={14} /> PUBLIC EXAMPLES</h3><span>{selectedExercise.examples.length} cases</span></div>
         {#each selectedExercise.examples as example}
-          <div class="example-card"><div class="example-label">{example.label}</div><div class="example-io"><div><span>INPUT</span><pre>{pretty(example.input)}</pre></div><div class="io-arrow">→</div><div><span>OUTPUT</span><pre>{pretty(example.expectedOutput)}</pre></div></div></div>
+          <div class="example-card"><div class="example-label">{example.label}</div><div class="example-io"><div class="example-value"><span>INPUT</span><pre>{pretty(example.input)}</pre></div><div class="example-value"><span>EXPECTED OUTPUT</span><pre>{pretty(example.expectedOutput)}</pre></div></div></div>
         {/each}
       </section>
       <section class="detail-section status-section"><label for="exercise-status">MY STATUS</label><div class="status-select-wrap"><select id="exercise-status" value={progress[selectedExercise.id] ?? 'not-started'} on:change={(event) => markStatus((event.currentTarget as HTMLSelectElement).value as ExerciseStatus)}><option value="not-started">Not started</option><option value="in-progress">In progress</option><option value="done">Done</option></select><ChevronDown size={14} /></div></section>
