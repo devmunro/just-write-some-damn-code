@@ -26,38 +26,7 @@
   onMount(async () => {
     configureWorkers();
     monaco = await import('monaco-editor');
-    if (!monaco.languages.getLanguages().some((entry) => entry.id === 'php')) {
-      monaco.languages.register({ id: 'php' });
-      monaco.languages.setMonarchTokensProvider('php', {
-        defaultToken: '',
-        tokenPostfix: '.php',
-        keywords: ['function', 'return', 'if', 'else', 'elseif', 'foreach', 'for', 'while', 'class', 'public', 'private', 'static', 'new', 'null', 'true', 'false', 'echo', 'use', 'namespace'],
-        tokenizer: {
-          root: [
-            [/\?php|\?>/, 'delimiter.php'],
-            [/\$[a-zA-Z_][\w]*/, 'variable'],
-            [/[a-zA-Z_][\w]*/, { cases: { '@keywords': 'keyword', '@default': 'identifier' } }],
-            [/\d+/, 'number'],
-            [/[{}()\[\]]/, '@brackets'],
-            [/[;,.]/, 'delimiter'],
-            [/[=+\-*/%<>!&|?:]+/, 'operator'],
-            [/'([^'\\]|\\.)*$/, 'string.invalid'],
-            [/'([^'\\]|\\.)*'/, 'string'],
-            [/"([^"\\]|\\.)*$/, 'string.invalid'],
-            [/"([^"\\]|\\.)*"/, 'string'],
-            [/\/\*/, 'comment', '@comment'],
-            [/\/\/.*$/, 'comment'],
-            [/#.*$/, 'comment']
-          ],
-          comment: [[/[^*/]+/, 'comment'], [/\*\//, 'comment', '@pop'], [/[*\/]/, 'comment']]
-        }
-      });
-      monaco.languages.setLanguageConfiguration('php', {
-        comments: { lineComment: '//' },
-        brackets: [['{', '}'], ['[', ']'], ['(', ')']],
-        autoClosingPairs: [{ open: '{', close: '}' }, { open: '[', close: ']' }, { open: '(', close: ')' }, { open: '"', close: '"' }, { open: "'", close: "'" }]
-      });
-    }
+    configurePhpBehavior(monaco);
     monaco.editor.defineTheme('jwsdc-black', {
       base: 'vs-dark',
       inherit: true,
@@ -97,8 +66,8 @@
       tabCompletion: 'off',
       snippetSuggestions: 'none',
       autoIndent: preferences.autoIndent ? 'full' : 'none',
-      autoClosingBrackets: preferences.autoCloseBrackets ? 'always' : 'never',
-      autoClosingQuotes: preferences.autoCloseQuotes ? 'always' : 'never'
+      autoClosingBrackets: preferences.autoCloseBrackets ? 'languageDefined' : 'never',
+      autoClosingQuotes: preferences.autoCloseQuotes ? 'languageDefined' : 'never'
     });
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {});
 
@@ -126,8 +95,8 @@
   $: if (editor) {
     editor.updateOptions({
       autoIndent: preferences.autoIndent ? 'full' : 'none',
-      autoClosingBrackets: preferences.autoCloseBrackets ? 'always' : 'never',
-      autoClosingQuotes: preferences.autoCloseQuotes ? 'always' : 'never',
+      autoClosingBrackets: preferences.autoCloseBrackets ? 'languageDefined' : 'never',
+      autoClosingQuotes: preferences.autoCloseQuotes ? 'languageDefined' : 'never',
       quickSuggestions: false,
       suggestOnTriggerCharacters: false,
       inlineSuggest: { enabled: false },
@@ -153,6 +122,44 @@
         return new EditorWorker();
       }
     };
+  }
+
+  function configurePhpBehavior(monacoApi: typeof Monaco) {
+    monacoApi.languages.setLanguageConfiguration('php', {
+      comments: { lineComment: '//' },
+      brackets: [['{', '}'], ['[', ']'], ['(', ')']],
+      autoClosingPairs: [
+        { open: '{', close: '}', notIn: ['string', 'comment'] },
+        { open: '[', close: ']', notIn: ['string', 'comment'] },
+        { open: '(', close: ')', notIn: ['string', 'comment'] },
+        { open: '"', close: '"', notIn: ['string', 'comment'] },
+        { open: "'", close: "'", notIn: ['string', 'comment'] }
+      ],
+      surroundingPairs: [
+        { open: '{', close: '}' },
+        { open: '[', close: ']' },
+        { open: '(', close: ')' },
+        { open: '"', close: '"' },
+        { open: "'", close: "'" }
+      ],
+      indentationRules: {
+        increaseIndentPattern: /^.*(?:\{[^}]*|\([^)]*|\[[^\]]*)$/,
+        decreaseIndentPattern: /^\s*(?:\}|\]|\))/
+      },
+      onEnterRules: [
+        {
+          beforeText: /^\s*(?:if|elseif|else|for|foreach|while|switch|catch|function|class|interface|trait|enum|namespace)\b.*\{[^}]*$/,
+          afterText: /^\s*\}/,
+          action: { indentAction: monacoApi.languages.IndentAction.IndentOutdent }
+        }
+      ],
+      folding: {
+        markers: {
+          start: /^\s*(?:#|\/\/)region\b/,
+          end: /^\s*(?:#|\/\/)endregion\b/
+        }
+      }
+    });
   }
 </script>
 

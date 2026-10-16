@@ -6,7 +6,7 @@
   import HistoryDrawer from '$lib/components/HistoryDrawer.svelte';
   import SettingsDrawer from '$lib/components/SettingsDrawer.svelte';
   import { DSA_EXERCISES, BUILD_EXERCISES } from '$lib/practice/catalog';
-  import { editorLanguages, type EditorLanguage } from '$lib/submission/modes';
+  import { editorBehaviorProfiles, editorLanguages, type EditorLanguage } from '$lib/submission/modes';
   import type { EditorPreferencesByLanguage, Exercise, ExerciseStatus, Feedback, GeneratedVariant, JsonValue, OllamaSettings, PracticeLanguage, RunRequest, RunResult } from '$lib/domain/types';
   import { listChallengeHistory } from '$lib/history/repository';
   import { loadDraft, saveDraft, loadEditorPreferences, saveEditorPreferences, loadOllamaSettings, saveOllamaSettings, loadProgress, saveProgress } from '$lib/practice/repository';
@@ -77,6 +77,7 @@
   };
   $: doneCount = Object.values(progress).filter((status) => status === 'done').length;
   $: currentPreferences = preferences[editorLanguage];
+  $: currentEditorBehavior = editorBehaviorProfiles[editorLanguage];
   $: isGenerated = Boolean(selectedExercise && 'generatedBy' in selectedExercise);
 
   onMount(async () => {
@@ -355,10 +356,10 @@
           <label class="language-select-label"><span class="sr-only">Programming language</span><select value={editorLanguage} on:change={changeLanguage}>{#each editorLanguages as language}<option value={language.value}>{language.label}</option>{/each}</select><ChevronDown size={13} /></label>
           <div class="options-anchor"><button class="icon-quiet" title="Editor behavior" aria-expanded={showEditorOptions} on:click={() => (showEditorOptions = !showEditorOptions)}><Settings2 size={16} /></button>
             {#if showEditorOptions}<div class="options-popover"><div class="popover-heading">Editor behavior <span>{editorLanguages.find((item) => item.value === editorLanguage)?.label}</span></div>
-              <label><span>Auto indentation</span><input type="checkbox" checked={currentPreferences.autoIndent} on:change={() => changePreference('autoIndent')} /></label>
+              <label><span>{currentEditorBehavior.indentLabel}</span><input type="checkbox" checked={currentPreferences.autoIndent} on:change={() => changePreference('autoIndent')} /></label>
               <label><span>Close brackets</span><input type="checkbox" checked={currentPreferences.autoCloseBrackets} on:change={() => changePreference('autoCloseBrackets')} /></label>
-              <label><span>Close quotes</span><input type="checkbox" checked={currentPreferences.autoCloseQuotes} on:change={() => changePreference('autoCloseQuotes')} /></label>
-              <p>Indentation and closing pairs only. Suggestions stay off.</p>
+              <label><span>{currentEditorBehavior.quoteLabel}</span><input type="checkbox" checked={currentPreferences.autoCloseQuotes} on:change={() => changePreference('autoCloseQuotes')} /></label>
+              <p>Saved separately for {editorLanguages.find((item) => item.value === editorLanguage)?.label}. {currentEditorBehavior.syntaxNote} Suggestions stay off.</p>
               <div class="shortcut-list" aria-label="Code space shortcuts">
                 <div class="shortcut-heading">CODE SPACE SHORTCUTS</div>
                 <div class="shortcut-row"><kbd>Ctrl + Enter</kbd><span>Run examples</span></div>
