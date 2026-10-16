@@ -256,6 +256,12 @@
   function compactDifficulty(difficulty: Exercise['difficulty']) {
     return difficulty === 'Beginner' ? 'Easy' : difficulty === 'Intermediate' ? 'Med' : 'Hard';
   }
+  function exerciseListTitle(exercise: Exercise) {
+    const separator = exercise.title.indexOf(' · ');
+    return separator < 0
+      ? exercise.title
+      : `${exercise.title.slice(separator + 3)} · ${exercise.title.slice(0, separator)}`;
+  }
   function toggleSidebar() {
     showSidebar = !showSidebar;
     localStorage.setItem('practice-sidebar-visible', String(showSidebar));
@@ -289,12 +295,7 @@
   <header class="topbar">
     <div class="topbar-brand-group">
       <div class="brand-lockup" role="img" aria-label="Just Write Some Damn Code">
-        <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
-          <path d="M24 1 L29.5 11 L40.5 7.5 L37 18.5 L47 24 L37 29.5 L40.5 40.5 L29.5 37 L24 47 L18.5 37 L7.5 40.5 L11 29.5 L1 24 L11 18.5 L7.5 7.5 L18.5 11 Z" fill="#ff5747" stroke="#ffae69" stroke-width="1.2" stroke-linejoin="round" />
-          <circle cx="24" cy="24" r="13.5" fill="#080908" stroke="#ffd15d" stroke-width="1.7" />
-          <text x="24" y="28.5" text-anchor="middle" fill="#ffd15d" font-family="ui-monospace, monospace" font-size="11.5" font-weight="900" letter-spacing="-1">@#</text>
-        </svg>
-        <div class="brand-name" aria-hidden="true"><span class="brand-just">juSt</span><span class="brand-write">WRITE</span><span class="brand-some">sOme</span><span class="brand-damn">DAMN</span><span class="brand-code">cODe</span><span class="brand-shout">!</span></div>
+        <div class="brand-name" aria-hidden="true"><span class="brand-just">just</span><span class="brand-write">WRITE</span><span class="brand-some">some</span><span class="brand-damn">DAMN</span><span class="brand-code">code</span></div>
       </div>
     </div>
     <div class="topbar-actions">
@@ -321,7 +322,7 @@
           </select><ChevronDown size={14} /></span></label>
           <div class="difficulty-filters" aria-label="Difficulty">
             {#each difficultyOptions as option}
-              <button class:level-active={difficultyFilter === option.value} disabled={difficultyCounts[option.value] === 0} on:click={() => changeDifficulty(option.value)}>{option.label}<span>{difficultyCounts[option.value]}</span></button>
+              <button class:level-active={difficultyFilter === option.value} class:level-beginner={option.value === 'Beginner'} class:level-intermediate={option.value === 'Intermediate'} class:level-advanced={option.value === 'Advanced'} disabled={difficultyCounts[option.value] === 0} on:click={() => changeDifficulty(option.value)}>{option.label}<span>{difficultyCounts[option.value]}</span></button>
             {/each}
           </div>
         </div>
@@ -330,7 +331,7 @@
           <div class="build-track-note"><span class="track-icon"><FileCode2 size={16} /></span><div><strong>Small builds</strong><p>12 single-file tasks. Pick a level.</p></div></div>
           <div class="difficulty-filters" aria-label="Build difficulty">
             {#each difficultyOptions as option}
-              <button class:level-active={difficultyFilter === option.value} disabled={difficultyCounts[option.value] === 0} on:click={() => changeDifficulty(option.value)}>{option.label}<span>{difficultyCounts[option.value]}</span></button>
+              <button class:level-active={difficultyFilter === option.value} class:level-beginner={option.value === 'Beginner'} class:level-intermediate={option.value === 'Intermediate'} class:level-advanced={option.value === 'Advanced'} disabled={difficultyCounts[option.value] === 0} on:click={() => changeDifficulty(option.value)}>{option.label}<span>{difficultyCounts[option.value]}</span></button>
             {/each}
           </div>
         </div>
@@ -341,9 +342,9 @@
         <label class="search-box"><Search size={14} /><input bind:value={query} placeholder="Search this list" aria-label="Search exercises" /></label>
         <div class="exercise-list">
           {#each visibleExercises as exercise}
-            <button class:exercise-active={selectedId === exercise.id} class="exercise-row" on:click={() => selectExercise(exercise)}>
-              <span class="exercise-row-copy"><span class="exercise-row-title">{exercise.title}</span></span>
-              <span class="exercise-difficulty" title={`${displayDifficulty(exercise.difficulty)} difficulty`}>{compactDifficulty(exercise.difficulty)}</span>
+            <button class:exercise-active={selectedId === exercise.id} class="exercise-row" aria-label={`${exercise.title} · ${displayDifficulty(exercise.difficulty)}`} on:click={() => selectExercise(exercise)}>
+              <span class="exercise-row-copy"><span class="exercise-row-title" title={exercise.title}>{exerciseListTitle(exercise)}</span></span>
+              <span class="exercise-difficulty" class:diff-easy={exercise.difficulty === 'Beginner'} class:diff-medium={exercise.difficulty === 'Intermediate'} class:diff-hard={exercise.difficulty === 'Advanced'} title={`${displayDifficulty(exercise.difficulty)} difficulty`}>{compactDifficulty(exercise.difficulty)}</span>
             </button>
           {:else}
             <p class="empty-search">No exercises match that search.</p>
