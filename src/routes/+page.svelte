@@ -7,7 +7,7 @@
   import SettingsDrawer from '$lib/components/SettingsDrawer.svelte';
   import { DSA_EXERCISES, BUILD_EXERCISES } from '$lib/practice/catalog';
   import { editorLanguages, type EditorLanguage } from '$lib/submission/modes';
-  import type { EditorPreferencesByLanguage, Exercise, ExerciseStatus, Feedback, GeneratedVariant, OllamaSettings, PracticeLanguage, RunRequest, RunResult } from '$lib/domain/types';
+  import type { EditorPreferencesByLanguage, Exercise, ExerciseStatus, Feedback, GeneratedVariant, JsonValue, OllamaSettings, PracticeLanguage, RunRequest, RunResult } from '$lib/domain/types';
   import { listChallengeHistory } from '$lib/history/repository';
   import { loadDraft, saveDraft, loadEditorPreferences, saveEditorPreferences, loadOllamaSettings, saveOllamaSettings, loadProgress, saveProgress } from '$lib/practice/repository';
   import { generateExerciseVariant, reviewExerciseSubmission } from '$lib/ai/ollama';
@@ -231,6 +231,19 @@
   }
 
   function pretty(value: unknown): string { return JSON.stringify(value, null, 2); }
+  function formatExampleValue(value: JsonValue): string {
+    if (Array.isArray(value)) return `[${value.map(formatExampleValue).join(', ')}]`;
+    if (value !== null && typeof value === 'object') {
+      return `{${Object.entries(value).map(([key, item]) => `${JSON.stringify(key)}: ${formatExampleValue(item)}`).join(', ')}}`;
+    }
+    return JSON.stringify(value) ?? 'null';
+  }
+  function formatExampleInput(value: JsonValue): string {
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      return Object.entries(value).map(([name, item]) => `${name} = ${formatExampleValue(item)}`).join(', ');
+    }
+    return formatExampleValue(value);
+  }
   function displayDifficulty(difficulty: Exercise['difficulty']) {
     return difficulty === 'Beginner' ? 'Easy' : difficulty === 'Intermediate' ? 'Medium' : 'Hard';
   }
@@ -396,9 +409,9 @@
       <section class="prompt-panel" aria-labelledby="prompt-heading"><h3 id="prompt-heading">THE CHALLENGE</h3><p>{selectedExercise.prompt}</p></section>
       <div class="contract-card"><div class="contract-heading"><Code2 size={14} /><span>WHAT TO WRITE</span></div><code>solve(input) → JSON</code><p>Write the function yourself. The runner passes each example as a JSON value.</p></div>
       <section class="detail-section constraints-section"><h3><ListFilter size={14} /> CONSTRAINTS</h3><ul>{#each selectedExercise.constraints as constraint}<li>{constraint}</li>{/each}</ul></section>
-      <section class="detail-section examples-section"><div class="section-header"><h3><BookOpen size={14} /> PUBLIC EXAMPLES</h3><span>{selectedExercise.examples.length} cases</span></div>
+      <section class="detail-section examples-section"><div class="section-header"><h3><BookOpen size={14} /> EXAMPLES</h3><span>{selectedExercise.examples.length} examples</span></div>
         {#each selectedExercise.examples as example}
-          <div class="example-card"><div class="example-label">{example.label}</div><div class="example-io"><div class="example-value"><span>INPUT</span><pre>{pretty(example.input)}</pre></div><div class="example-value"><span>EXPECTED OUTPUT</span><pre>{pretty(example.expectedOutput)}</pre></div></div></div>
+          <div class="example-card"><div class="example-label">{example.label}</div><div class="example-io"><div class="example-line"><span>Input:</span><pre>{formatExampleInput(example.input)}</pre></div><div class="example-line"><span>Output:</span><pre>{formatExampleValue(example.expectedOutput)}</pre></div></div></div>
         {/each}
       </section>
       <section class="detail-section status-section"><label for="exercise-status">MY STATUS</label><div class="status-select-wrap"><select id="exercise-status" value={progress[selectedExercise.id] ?? 'not-started'} on:change={(event) => markStatus((event.currentTarget as HTMLSelectElement).value as ExerciseStatus)}><option value="not-started">Not started</option><option value="in-progress">In progress</option><option value="done">Done</option></select><ChevronDown size={14} /></div></section>
