@@ -37,6 +37,7 @@
   let generatedVariant: GeneratedVariant | null = null;
   let editorLanguage: PracticeLanguage = 'python';
   let editorTypography = { fontSize: 15, lineHeight: 24 };
+  let isCodeEditorFocused = false;
   let preferences = emptyPreferences;
   let submission = '';
   let loadedDraftKey = '';
@@ -98,6 +99,7 @@
     }
     selectedExercise = exercise;
     selectedId = exercise.id;
+    isCodeEditorFocused = false;
     generatedVariant = 'generatedBy' in exercise ? exercise as GeneratedVariant : null;
     result = null;
     feedback = null;
@@ -145,6 +147,7 @@
     if (next === editorLanguage) return;
     if (selectedExercise && loadedDraftKey === `${selectedExercise.id}:${editorLanguage}`) await saveDraft(selectedExercise.id, editorLanguage, submission);
     editorLanguage = next;
+    isCodeEditorFocused = false;
     result = null;
     loadedDraftKey = '';
     if (selectedExercise) {
@@ -369,8 +372,8 @@
       </div>
 
       <div class="editor-surface" role="region" aria-label="Code space">
-        <CodeEditor bind:value={submission} language={editorLanguage} preferences={currentPreferences} on:input={(event) => handleEditorInput((event as CustomEvent<string>).detail)} on:typography={(event) => (editorTypography = event.detail)} />
-        {#if !submission}<div class="editor-placeholder" style={`--editor-font-size: ${editorTypography.fontSize}px; --editor-line-height: ${editorTypography.lineHeight}px`}><span>1</span><span>Write code here.</span></div>{/if}
+        <CodeEditor bind:value={submission} language={editorLanguage} preferences={currentPreferences} on:input={(event) => handleEditorInput((event as CustomEvent<string>).detail)} on:typography={(event) => (editorTypography = event.detail)} on:editorfocus={() => (isCodeEditorFocused = true)} on:editorblur={() => (isCodeEditorFocused = false)} />
+        {#if !submission && !isCodeEditorFocused}<div class="editor-placeholder" style={`--editor-font-size: ${editorTypography.fontSize}px; --editor-line-height: ${editorTypography.lineHeight}px`}>Write code here.</div>{/if}
       </div>
 
       {#if error}<div class="message-banner error-banner"><X size={15} /><span>{error}</span><button on:click={() => (error = '')} aria-label="Dismiss error"><X size={13} /></button></div>{/if}

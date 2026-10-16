@@ -16,6 +16,8 @@
   const dispatch = createEventDispatcher<{
     input: string;
     typography: { fontSize: number; lineHeight: number };
+    editorfocus: true;
+    editorblur: true;
   }>();
 
   let container: HTMLDivElement;
@@ -102,6 +104,8 @@
       value = editor?.getValue() ?? '';
       dispatch('input', value);
     });
+    codeEditor.onDidFocusEditorText(() => dispatch('editorfocus', true));
+    codeEditor.onDidBlurEditorText(() => dispatch('editorblur', true));
   });
 
   onDestroy(() => {
