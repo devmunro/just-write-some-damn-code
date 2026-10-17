@@ -2,6 +2,11 @@
 
 Notable changes to Just Write Some Damn Code are recorded here.
 
+## [0.1.0-alpha.3] — 2026-10-17
+
+- Hide the Windows console window when launching the release app.
+- Publish Windows and macOS installers with per-platform SHA-256 checksums.
+
 ## [0.1.0-alpha.2] — 2026-10-17
 
 - Add Windows x64 and macOS Apple silicon and Intel installers to GitHub releases.

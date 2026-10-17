@@ -5,157 +5,105 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/devmunro/just-write-some-damn-code/releases"><img src="https://img.shields.io/github/v/release/devmunro/just-write-some-damn-code?include_prereleases&style=for-the-badge" alt="Latest release" /></a>
-  <a href="https://github.com/devmunro/just-write-some-damn-code/actions/workflows/validate.yml"><img src="https://img.shields.io/github/actions/workflow/status/devmunro/just-write-some-damn-code/validate.yml?branch=main&style=for-the-badge&label=checks" alt="Frontend validation workflow status" /></a>
+  <a href="https://github.com/devmunro/just-write-some-damn-code/releases"><img src="https://img.shields.io/github/v/release/devmunro/just-write-some-damn-code?include_prereleases&style=for-the-badge" alt="Latest alpha release" /></a>
+  <a href="https://github.com/devmunro/just-write-some-damn-code/actions/workflows/validate.yml"><img src="https://img.shields.io/github/actions/workflow/status/devmunro/just-write-some-damn-code/validate.yml?branch=main&style=for-the-badge&label=checks" alt="Validation workflow status" /></a>
   <img src="https://img.shields.io/badge/desktop-Tauri%202-ffc131?style=for-the-badge&logo=tauri&logoColor=111" alt="Tauri 2 desktop app" />
   <img src="https://img.shields.io/badge/interface-Svelte%205-ff3e00?style=for-the-badge&logo=svelte&logoColor=fff" alt="Svelte 5 interface" />
   <img src="https://img.shields.io/badge/editor-Monaco-007acc?style=for-the-badge&logo=visualstudiocode&logoColor=fff" alt="Monaco editor" />
-  <img src="https://img.shields.io/badge/autocomplete-none-252525?style=for-the-badge" alt="No autocomplete suggestions" />
+  <img src="https://img.shields.io/badge/AI%20autocomplete-none-252525?style=for-the-badge" alt="No AI autocomplete" />
 </p>
 
-**A desktop practice space for people who want to keep their coding skills sharp.** Pick a challenge, write the code yourself, and run it against examples. Syntax highlighting and editor conveniences are there; AI completions, answer keys, starter solutions, scores, and leaderboards are not.
+<p align="center"><strong>Pick a challenge. Write every line. Keep your skills sharp.</strong></p>
 
-> **Alpha software:** the release page provides installable Windows and macOS packages. The runner still needs cross-platform validation.
+<p align="center">
+  <a href="https://github.com/devmunro/just-write-some-damn-code/releases"><strong>Download the alpha</strong></a>
+  · <a href="#the-roadmap">See the roadmap</a>
+  · <a href="docs/ARCHITECTURE.md">Read the architecture notes</a>
+</p>
 
-## The workspace
+Choose a task, write your own code, and run it against public examples. The editor gives you syntax coloring and configurable typing conveniences. AI feedback is optional and stays local. There are no AI completions, starter solutions, answer keys, scores, or leaderboards.
 
-![The practice workspace with the exercise list, code editor, and local runner panel](docs/screenshots/practice-workspace.png)
+## Take a look
 
-Open a challenge when you want the full prompt, constraints, and examples:
+![The practice workspace: challenge list, code editor, language controls, and local runner](docs/screenshots/practice-workspace.png)
 
-![Challenge details with the prompt, solve(input) contract, constraints, and examples](docs/screenshots/challenge-details.png)
+<p align="center"><img src="docs/screenshots/challenge-details.png" width="720" alt="Challenge details with a clear prompt, solve input contract, constraints, and JSON examples" /></p>
 
 ## What you can practice
 
-- **250 original DSA exercises** across arrays and hashing, two pointers, sliding windows, binary search, stacks and queues, linked lists, trees and tries, heaps, graphs, backtracking, dynamic programming, greedy methods, intervals, bit manipulation, and math and geometry.
-- **12 single-file build tasks** for small practical programs. Both tracks include Easy, Medium, and Hard challenges.
-- **Four languages:** Python, JavaScript, TypeScript, and PHP.
-- **One simple exercise contract:** implement `solve(input)` and return a JSON value. Every challenge includes public JSON input and expected-output examples.
-- **A focused editor:** Monaco provides syntax coloring and basic editor behavior. Suggestions and inline completions stay off. Indentation and bracket or quote closing can be set per language.
-- **Local progress:** the latest draft for each exercise and language, exercise status, and settings are saved locally. History records passed exercises; it does not keep source code or show solutions.
+| DSA challenges | Build tasks | Languages | Practice data |
+| --- | --- | --- | --- |
+| 250 original exercises | 12 single-file briefs | Python, JavaScript, TypeScript, PHP | Saved on your device |
 
-The DSA catalog has 75 beginner, 125 intermediate, and 50 advanced exercises. These appear in the app as Easy, Medium, and Hard. Build tasks also have all three difficulty levels.
+- **A steady difficulty curve:** 75 Easy, 125 Medium, and 50 Hard DSA exercises. Build tasks also include all three levels.
+- **Useful patterns:** arrays and hashing, two pointers, sliding windows, binary search, stacks and queues, linked lists, trees and tries, heaps, graphs, backtracking, dynamic programming, greedy methods, intervals, bit manipulation, and math and geometry.
+- **A small, consistent run format:** implement `solve(input)` and return JSON. Each task includes public input and expected-output examples.
+- **An editor that leaves the thinking to you:** Monaco syntax highlighting, with suggestions and inline completions disabled. Indentation and bracket or quote closing can be set per language.
+- **Local progress:** drafts are saved per exercise and language. History remembers passed exercises without storing or displaying solutions. There are no accounts or cloud sync.
 
-## Optional local AI
+## The roadmap
 
-AI is an optional tool you ask for when you want it. Connect a local [Ollama](https://ollama.com/download) installation to:
+The app is in alpha. The roadmap grows the kinds of projects you can practice while keeping the same promise: **you write the code; the tools stay out of the way.** No dates are attached to planned versions.
 
-- Generate a fresh, AI-labeled variant of the selected exercise.
-- Get qualitative feedback on your submission and a suggestion for what to try next.
-
-The app accepts loopback Ollama addresses only. It does not send requests to a hosted AI service. Feedback is session-only; generated variants are labeled and validated, and AI output is never executed. The editor has no AI autocomplete.
-
-## Run your code locally
-
-The desktop app uses a disposable local Podman or Docker container for the runner. The browser version is useful for browsing, writing, and local drafts, but code execution requires the desktop app and a running container engine.
-
-The first setup builds the local `jwsdc-runner:1.0.0` image and downloads its base image and language runtimes. After setup, runs have no network access. The container uses a read-only root filesystem, a temporary workspace, a non-root user, no extra Linux capabilities, and limits for CPU, memory, processes, time, and output. The runner receives the code you wrote and the selected public examples.
+<p align="center">
+  <img src="docs/roadmap.svg" width="100%" alt="Roadmap: V1 single-file practice, V2 multi-file workspaces, V3 local services and voice-authored prompts, V4 integrated builds" />
+</p>
 
 ## Download and install
 
-Open the [release page](https://github.com/devmunro/just-write-some-damn-code/releases) and download the installer for your computer:
+Get the installers and SHA-256 checksums from the [GitHub Releases page](https://github.com/devmunro/just-write-some-damn-code/releases):
 
-- **Windows:** the `x64-setup.exe` installer.
-- **Mac with Apple silicon:** the `aarch64.dmg` installer.
-- **Mac with Intel:** the `x64.dmg` installer.
+| Computer | Download |
+| --- | --- |
+| Windows x64 | `*-x64-setup.exe` |
+| Mac with Apple silicon | `*aarch64.dmg` |
+| Mac with Intel | `*x64.dmg` |
 
-On Mac, open the DMG and drag **Just Write Some Damn Code** into Applications. On Windows, run the setup installer. These alpha builds are not signed by a commercial publisher; Windows SmartScreen or macOS Gatekeeper may ask you to confirm the app the first time you open it. On Mac, allow the app from **System Settings → Privacy & Security** if Gatekeeper blocks it. SHA-256 checksum files are attached to each release.
+Run the Windows setup file. On Mac, open the DMG and drag the app into Applications. These alpha packages are not signed by a commercial publisher or notarized, so Windows or macOS may ask you to confirm the app on first launch. Installing the desktop app does not require Node.js or Rust.
 
-Installing the app does not require Node.js or Rust. To run code examples, install and start [Podman](https://podman.io/docs/installation) or [Docker](https://docs.docker.com/get-started/get-docker/) and choose **Set up runner** in the app. Browsing, writing, and local drafts work without a container engine.
+### Run code examples
 
-### Build from source
+Running code requires [Podman](https://podman.io/docs/installation) or [Docker](https://docs.docker.com/get-started/get-docker/). In the app, choose **Set up runner** once. That downloads the base image and builds the local runner image; after setup, user code runs without network access. The container uses a read-only root filesystem, a temporary workspace, a non-root user, and CPU, memory, process, time, and output limits.
 
-1. Install Node.js and the [Rust toolchain](https://rustup.rs/).
-2. Install the desktop prerequisites for your operating system using the [Tauri v2 prerequisite guide](https://v2.tauri.app/start/prerequisites/).
-3. Clone the repository and install the frontend dependencies:
+The app remains useful without a container engine: browse challenges, write code, and save drafts. On Windows and Mac, Podman uses a Podman machine; start it before setting up the runner.
 
-   ```bash
-   git clone https://github.com/devmunro/just-write-some-damn-code.git
-   cd just-write-some-damn-code
-   npm ci
-   ```
+## Optional local AI
 
-4. Start the desktop app:
+Install [Ollama](https://ollama.com/download) and a model on the same computer, then choose **Find installed models** in Settings. Ask for a challenge variant or qualitative feedback only when you want it. Variants are labeled and validated; feedback suggests improvements or a next task, without giving a solution or score. AI output is never executed, and the editor has no AI autocomplete.
 
-   ```bash
-   npm run tauri dev
-   ```
+## Build from source
 
-5. To run examples, install and start [Podman](https://podman.io/docs/installation) or [Docker](https://docs.docker.com/get-started/get-docker/), then choose **Set up runner** in the app. The one-time image setup needs network access. Podman on macOS and Windows runs containers through a Podman machine; follow Podman's setup instructions for your platform.
-
-Without Rust and Tauri's system libraries, use the browser interface for frontend development:
+Install Node.js, the [Rust toolchain](https://rustup.rs/), and the platform requirements in the [Tauri v2 guide](https://v2.tauri.app/start/prerequisites/). Then:
 
 ```bash
-npm run dev
-```
-
-The browser interface does not expose the native runner. Drafts and settings use browser-local storage during frontend development.
-
-### Connect Ollama (optional)
-
-1. Install Ollama and download a model on the same computer.
-2. Open **Settings** in the app and select **Find installed models**.
-3. Choose and save a model. Use the variant or feedback controls only when you want an AI action.
-
-## Development
-
-```bash
+git clone https://github.com/devmunro/just-write-some-damn-code.git
+cd just-write-some-damn-code
 npm ci
-npm run check
-npm test
-npm run build
 npm run tauri dev
 ```
 
-The first three commands cover Svelte and TypeScript checks, unit tests, and the frontend production build. Building the desktop application also needs Rust and the platform dependencies listed by Tauri. Running example code additionally needs Podman or Docker.
+To work on the browser interface without Rust, run `npm run dev`. Browser mode supports writing and local drafts but does not include the native code runner. Before opening a change, run:
 
-See [the architecture notes](docs/ARCHITECTURE.md) for storage migrations, runner boundaries, content rules, and the planned extension points.
-
-## What's in the project
-
-| Part | Technology | Job |
-| --- | --- | --- |
-| Desktop shell | Tauri 2 and Rust | Native window, local commands, SQLite migrations, and sandbox orchestration |
-| Interface | Svelte 5, TypeScript, and Vite | Exercise catalog, settings, prompts, feedback, and workspace layout |
-| Editor | Monaco Editor | Syntax-aware code editing without autocomplete suggestions |
-| Local data | SQLite in the desktop app | Drafts, progress, settings, and passed-exercise history |
-| Optional AI | Ollama on loopback | On-demand variants and qualitative submission feedback |
-| Code runner | Podman or Docker | Disposable offline container for Python, JavaScript, TypeScript, and PHP |
-
-## Project layout
-
-```text
-.
-├── docs/
-│   ├── ARCHITECTURE.md
-│   └── screenshots/
-├── src/
-│   ├── lib/
-│   │   ├── ai/             # Ollama prompts and validation
-│   │   ├── components/     # Editor, settings, history, and shared UI
-│   │   ├── domain/         # Shared TypeScript types
-│   │   ├── history/        # Passed-exercise history
-│   │   ├── practice/       # Exercise catalog and local persistence
-│   │   └── submission/     # Language modes and editor preferences
-│   └── routes/             # SvelteKit application screen
-└── src-tauri/
-    ├── runner/             # Container image and language harnesses
-    └── src/                # Native commands, persistence, and runner boundary
+```bash
+npm run check
+npm test
+npm run build
 ```
 
-## Roadmap
+## How it is built
 
-- **V1 — single-file practice:** original DSA challenges, small build tasks, local drafts, optional local AI, and an offline container runner.
-- **V2 — project workspaces:** multi-file tasks and projects.
-- **V3 — local services:** Flask and FastAPI challenges, HTTP and WebSocket exercises with explicitly permitted local networking, and optional voice-to-editable challenge requests.
-- **V4 — integrated builds:** dashboards, chatbots, and image-generation clients using local or mock services.
+| Part | Technology | Purpose |
+| --- | --- | --- |
+| Desktop app | Tauri 2, Rust | Native window, SQLite storage, local commands, and sandbox boundary |
+| Interface | Svelte 5, TypeScript, Vite | Challenge browsing, editor workspace, settings, and history |
+| Code editor | Monaco | Language-aware editing without autocomplete suggestions |
+| Local AI | Ollama on loopback | On-demand variants and qualitative feedback |
+| Code runner | Podman or Docker | Disposable offline containers for the four supported languages |
 
-## Challenge sources and license status
+See [the architecture notes](docs/ARCHITECTURE.md) for the run protocol, storage, content rules, and future extension points.
 
-The exercises in this app are original. The catalog follows broad topic coverage from public study plans; it does not scrape or redistribute LeetCode or NeetCode problem lists or statements. Those collections are linked as optional external references: [NeetCode 250](https://neetcode.io/practice/practice/neetcode250) and [LeetCode Top Interview 150](https://leetcode.com/studyplan/top-interview-150/). This project is not affiliated with either service.
+## Content, licensing, and contributing
 
-**Project license:** not selected yet. Public visibility does not by itself grant permission to reuse or redistribute this code. Third-party dependencies remain under their respective licenses.
+All included exercises are original and use broad topic coverage only. The app links to [NeetCode 250](https://neetcode.io/practice/practice/neetcode250) and [LeetCode Top Interview 150](https://leetcode.com/studyplan/top-interview-150/) as external references; it does not scrape or redistribute their questions and is not affiliated with either service.
 
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the code and challenge-content guidelines.
+The project license has not been selected yet. Public access does not grant permission to reuse or redistribute the code. See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution and exercise-writing guidelines.

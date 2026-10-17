@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 600" role="img" aria-labelledby="title description">
+  <title id="title">Just Write Some Damn Code product roadmap</title>
+  <desc id="description">V1 is the current alpha for single-file practice. Planned versions add multi-file workspaces, local web services and voice-authored prompts, then larger integrated builds.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0c0c0c" />
+      <stop offset="1" stop-color="#050505" />
+    </linearGradient>
+    <linearGradient id="current" x1="0" x2="1">
+      <stop offset="0" stop-color="#ff675c" />
+      <stop offset="1" stop-color="#e7453e" />
+    </linearGradient>
+  </defs>
+
+  <rect x="1" y="1" width="1598" height="598" rx="22" fill="url(#background)" stroke="#292929" stroke-width="2" />
+
+  <text x="56" y="58" fill="#ff6a60" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="3">THE ROAD AHEAD</text>
+  <text x="56" y="101" fill="#f1efec" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="600">From focused reps to real local projects.</text>
+  <rect x="1351" y="40" width="192" height="34" rx="17" fill="#171311" stroke="#49302b" />
+  <circle cx="1371" cy="57" r="5" fill="#ff675c" />
+  <text x="1386" y="62" fill="#e2d6d2" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="1">CURRENT · ALPHA</text>
+
+  <path d="M223 146 H1368" fill="none" stroke="#3a3432" stroke-width="2" />
+  <path d="M1368 146 l-12 -7 v14 z" fill="#625a57" />
+  <path d="M223 146 V176 M608 146 V176 M993 146 V176 M1378 146 V176" fill="none" stroke="#393331" stroke-width="2" />
+  <circle cx="223" cy="146" r="9" fill="url(#current)" stroke="#ffaaa3" stroke-width="2" />
+  <circle cx="608" cy="146" r="7" fill="#161616" stroke="#79716e" stroke-width="2" />
+  <circle cx="993" cy="146" r="7" fill="#161616" stroke="#79716e" stroke-width="2" />
+  <circle cx="1378" cy="146" r="7" fill="#161616" stroke="#79716e" stroke-width="2" />
+
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <rect x="45" y="177" width="355" height="355" rx="15" fill="#12100f" stroke="#a8443e" stroke-width="2" />
+    <rect x="70" y="201" width="120" height="27" rx="13.5" fill="#321b19" />
+    <text x="85" y="219" fill="#ff8a81" font-size="13" font-weight="700" letter-spacing="1.2">V1 · IN ALPHA</text>
+    <text x="70" y="269" fill="#f5f2ef" font-size="24" font-weight="700">Single-file practice</text>
+    <path d="M70 289 H375" stroke="#342523" />
+    <circle cx="77" cy="322" r="3.5" fill="#ff675c" />
+    <text x="91" y="328" fill="#dedbd8" font-size="17">250 original DSA challenges</text>
+    <circle cx="77" cy="361" r="3.5" fill="#ff675c" />
+    <text x="91" y="367" fill="#dedbd8" font-size="17">12 practical build briefs</text>
+    <circle cx="77" cy="400" r="3.5" fill="#ff675c" />
+    <text x="91" y="406" fill="#dedbd8" font-size="17">Python · JS · TS · PHP</text>
+    <circle cx="77" cy="439" r="3.5" fill="#ff675c" />
+    <text x="91" y="445" fill="#dedbd8" font-size="17">Local drafts and offline runner</text>
+    <circle cx="77" cy="478" r="3.5" fill="#ff675c" />
+    <text x="91" y="484" fill="#dedbd8" font-size="17">Optional local Ollama feedback</text>
+
+    <rect x="430" y="177" width="355" height="355" rx="15" fill="#101010" stroke="#303030" stroke-width="2" />
+    <rect x="455" y="201" width="112" height="27" rx="13.5" fill="#1a1a1a" />
+    <text x="470" y="219" fill="#c6c0bc" font-size="13" font-weight="700" letter-spacing="1.2">V2 · PLANNED</text>
+    <text x="455" y="269" fill="#f0eeeb" font-size="24" font-weight="700">Project workspaces</text>
+    <path d="M455 289 H760" stroke="#2b2b2b" />
+    <circle cx="462" cy="322" r="3.5" fill="#c58c70" />
+    <text x="476" y="328" fill="#d5d2cf" font-size="17">Multi-file task workspaces</text>
+    <circle cx="462" cy="361" r="3.5" fill="#c58c70" />
+    <text x="476" y="367" fill="#d5d2cf" font-size="17">Create and organize project files</text>
+    <circle cx="462" cy="400" r="3.5" fill="#c58c70" />
+    <text x="476" y="406" fill="#d5d2cf" font-size="17">Save work locally per project</text>
+    <circle cx="462" cy="439" r="3.5" fill="#c58c70" />
+    <text x="476" y="445" fill="#d5d2cf" font-size="17">Keep execution in the sandbox</text>
+
+    <rect x="815" y="177" width="355" height="355" rx="15" fill="#101010" stroke="#303030" stroke-width="2" />
+    <rect x="840" y="201" width="112" height="27" rx="13.5" fill="#1a1a1a" />
+    <text x="855" y="219" fill="#c6c0bc" font-size="13" font-weight="700" letter-spacing="1.2">V3 · PLANNED</text>
+    <text x="840" y="269" fill="#f0eeeb" font-size="23" font-weight="700">Local services + voice</text>
+    <path d="M840 289 H1145" stroke="#2b2b2b" />
+    <circle cx="847" cy="322" r="3.5" fill="#c58c70" />
+    <text x="861" y="328" fill="#d5d2cf" font-size="17">Flask and FastAPI exercises</text>
+    <circle cx="847" cy="361" r="3.5" fill="#c58c70" />
+    <text x="861" y="367" fill="#d5d2cf" font-size="17">HTTP APIs and WebSockets</text>
+    <circle cx="847" cy="400" r="3.5" fill="#c58c70" />
+    <text x="861" y="406" fill="#d5d2cf" font-size="17">Voice to editable task requests</text>
+    <circle cx="847" cy="439" r="3.5" fill="#c58c70" />
+    <text x="861" y="445" fill="#d5d2cf" font-size="17">Networking allowed per task</text>
+
+    <rect x="1200" y="177" width="355" height="355" rx="15" fill="#101010" stroke="#303030" stroke-width="2" />
+    <rect x="1225" y="201" width="112" height="27" rx="13.5" fill="#1a1a1a" />
+    <text x="1240" y="219" fill="#c6c0bc" font-size="13" font-weight="700" letter-spacing="1.2">V4 · PLANNED</text>
+    <text x="1225" y="269" fill="#f0eeeb" font-size="24" font-weight="700">Integrated builds</text>
+    <path d="M1225 289 H1530" stroke="#2b2b2b" />
+    <circle cx="1232" cy="322" r="3.5" fill="#c58c70" />
+    <text x="1246" y="328" fill="#d5d2cf" font-size="17">Dashboards and chatbots</text>
+    <circle cx="1232" cy="361" r="3.5" fill="#c58c70" />
+    <text x="1246" y="367" fill="#d5d2cf" font-size="17">Image-generation clients</text>
+    <circle cx="1232" cy="400" r="3.5" fill="#c58c70" />
+    <text x="1246" y="406" fill="#d5d2cf" font-size="17">Mock or local service APIs</text>
+    <circle cx="1232" cy="439" r="3.5" fill="#c58c70" />
+    <text x="1246" y="445" fill="#d5d2cf" font-size="17">Longer end-to-end projects</text>
+  </g>
+
+  <path d="M72 564 H1528" stroke="#292929" />
+  <text x="800" y="587" text-anchor="middle" fill="#bdb8b4" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="0.5">YOU WRITE EVERY LINE  ·  AI STAYS OPTIONAL  ·  PRACTICE STAYS LOCAL  ·  NO SCORES OR ANSWER KEYS</text>
+</svg>
