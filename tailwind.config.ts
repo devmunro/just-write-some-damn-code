@@ -15,7 +15,7 @@ export default {
         raised: '#202734',
         line: '#303948',
         steel: '#9aa6b5',
-        action: '#24a891',
+        action: '#b9bdc1',
         warn: '#ff9b73'
       }
     }

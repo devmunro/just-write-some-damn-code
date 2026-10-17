@@ -41,10 +41,10 @@
         'editorGutter.background': '#000000',
         'editorLineNumber.foreground': '#515151',
         'editorLineNumber.activeForeground': '#a7a7a7',
-        'editorCursor.foreground': '#81d4ad',
+        'editorCursor.foreground': '#f1f1f1',
         'editor.lineHighlightBackground': '#080808',
-        'editor.selectionBackground': '#24533d80',
-        'editor.inactiveSelectionBackground': '#19352760',
+        'editor.selectionBackground': '#51565c80',
+        'editor.inactiveSelectionBackground': '#30333860',
         'editorWidget.background': '#090909',
         'editorSuggestWidget.background': '#090909'
       }
