@@ -312,9 +312,10 @@ html, body { background: #000; }
 .ai-generated-badge { flex: 0 0 auto; }
 .editor-toolbar { height: 45px; flex-basis: 45px; border-bottom-color: #202020; background: #000; }
 .file-tab { min-width: 150px; padding: 0 14px 0 15px; gap: 12px; border-right-color: #202020; background: #000; font-size: 12px; line-height: 1; }
-.file-tab > span:not(.dirty-indicator):not(.file-dot) { display: inline-flex; align-items: center; line-height: 1; }
+.file-tab-label { min-width: 0; display: flex; align-items: baseline; gap: 9px; line-height: 1; white-space: nowrap; }
+.file-tab-label > span { line-height: 1; }
 .file-dot { flex: 0 0 18px; line-height: 1; }
-.tab-file-name { margin-left: 0; align-self: center; line-height: 1; }
+.tab-file-name { margin-left: 0; line-height: 1; }
 .dirty-indicator { flex: 0 0 5px; }
 .editor-actions { gap: 7px; padding: 0 13px; }
 .language-select-label { min-width: 112px; }
@@ -334,7 +335,8 @@ html, body { background: #000; }
 .runner-not-ready p { margin-top: 3px; font-size: 10px; }
 .runner-not-ready p a { color: #d5d7d9; text-decoration: underline; text-decoration-color: #686b6e; text-underline-offset: 2px; }
 .runner-not-ready p a:hover { color: #fff; text-decoration-color: currentColor; }
-.runner-not-ready { min-height: 76px; padding: 8px 15px; gap: 14px; align-items: center; flex-wrap: nowrap; }
+.runner-not-ready { min-height: 76px; padding: 8px 15px; gap: 8px; align-items: center; flex-wrap: nowrap; }
+.runner-not-ready-icon { width: 22px; height: 22px; flex-basis: 22px; display: grid; place-items: center; color: #c1c4c7; }
 .runner-not-ready-heading { min-height: 31px; }
 .runner-not-ready strong { font-size: 14px; }
 .runner-not-ready p { margin-top: 3px; font-size: 12px; }
@@ -524,7 +526,7 @@ html, body { background: #000; }
 .exercise-row-title { font-size: 13px; }
 .exercise-difficulty { font-size: 9px; }
 .search-box input { font-size: 13px; }
-.tab-file-name { margin-left: 0; color: #b2bcb4; font-family: var(--font-code-label); font-size: 12px; font-weight: 600; line-height: 1; }
+.tab-file-name { margin-left: 0; color: #b7b9bc; font-family: var(--font-code-label); font-size: 12px; font-weight: 600; line-height: 1; }
 
 @media (max-width: 960px) {
   .workspace-grid { grid-template-columns: 260px minmax(0, 1fr); }

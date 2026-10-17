@@ -366,7 +366,7 @@
       {/if}
 
       <div class="editor-toolbar">
-        <div class="file-tab" title="Code space. Hold Ctrl and scroll to zoom the code text."><span class="file-dot" class:file-python={editorLanguage === 'python'} class:file-php={editorLanguage === 'php'}>{#if editorLanguage === 'python'}Py{:else if editorLanguage === 'php'}Php{:else}JS{/if}</span><span>Code space</span><span class="tab-file-name">main.{editorLanguage === 'javascript' ? 'js' : editorLanguage === 'typescript' ? 'ts' : editorLanguage === 'python' ? 'py' : 'php'}</span><span class="dirty-indicator" title="Draft saved locally"></span></div>
+        <div class="file-tab" title="Code space. Hold Ctrl and scroll to zoom the code text."><span class="file-dot" class:file-python={editorLanguage === 'python'} class:file-php={editorLanguage === 'php'}>{#if editorLanguage === 'python'}Py{:else if editorLanguage === 'php'}Php{:else}JS{/if}</span><span class="file-tab-label"><span>Code space</span><span class="tab-file-name">main.{editorLanguage === 'javascript' ? 'js' : editorLanguage === 'typescript' ? 'ts' : editorLanguage === 'python' ? 'py' : 'php'}</span></span><span class="dirty-indicator" title="Draft saved locally"></span></div>
         <div class="editor-actions">
           <label class="language-select-label"><span class="sr-only">Programming language</span><select value={editorLanguage} on:change={changeLanguage}>{#each editorLanguages as language}<option value={language.value}>{language.label}</option>{/each}</select><ChevronDown size={13} /></label>
           <div class="options-anchor"><button class="icon-quiet" title="Editor behavior" aria-expanded={showEditorOptions} on:click={() => (showEditorOptions = !showEditorOptions)}><Settings2 size={16} /></button>
@@ -407,7 +407,7 @@
             {#if result.stderr}<pre class="runner-stderr">{result.stderr}</pre>{/if}
           </div>
         {:else if !sandbox.imageAvailable}
-          <div class="runner-not-ready"><div class="runner-not-ready-icon"><Container size={16} /></div><div class="runner-not-ready-copy"><div class="runner-not-ready-heading"><strong>{sandbox.engine ? 'One-time setup' : 'No container engine found'}</strong><div class="runner-actions">
+          <div class="runner-not-ready"><div class="runner-not-ready-icon"><Container size={20} /></div><div class="runner-not-ready-copy"><div class="runner-not-ready-heading"><strong>{sandbox.engine ? 'One-time setup' : 'No container engine found'}</strong><div class="runner-actions">
             {#if sandbox.engine}<button class="setup-button" disabled={isSettingUp} on:click={setupSandbox}>{#if isSettingUp}<Loader2 class="spin" size={14} />{:else}<span class="download-glyph">↓</span>{/if}{isSettingUp ? 'Setting up' : 'Set up runner'}</button>{/if}
             <button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button>
           </div></div><p>{#if sandbox.engine}Build the local runner image. Network access is needed once.{:else}Install <a href="https://podman.io/docs/installation" target="_blank" rel="noreferrer">Podman</a> or <a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noreferrer">Docker</a> to run examples.{/if}</p></div>
