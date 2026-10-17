@@ -171,6 +171,21 @@ async fn run_code(request: RunRequest) -> Result<RunResult, String> {
         .await.map_err(|error| format!("Runner process task failed: {error}"))?
 }
 
+#[cfg(windows)]
+fn engine_command(engine: &str) -> Command {
+    use std::os::windows::process::CommandExt;
+
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+    let mut command = Command::new(engine);
+    command.creation_flags(CREATE_NO_WINDOW);
+    command
+}
+
+#[cfg(not(windows))]
+fn engine_command(engine: &str) -> Command {
+    Command::new(engine)
+}
+
 fn local_ollama_endpoint(base_url: &str, path: &str) -> Result<Url, String> {
     let base = Url::parse(base_url.trim()).map_err(|error| format!("Invalid Ollama URL: {error}"))?;
     let host = base.host_str().unwrap_or_default().trim_start_matches('[').trim_end_matches(']').to_ascii_lowercase();
@@ -191,7 +206,7 @@ fn local_client(timeout: Duration) -> Result<reqwest::Client, String> {
 
 fn detect_engine() -> Option<String> {
     for candidate in ["podman", "docker"] {
-        if Command::new(candidate).arg("info").stdout(Stdio::null()).stderr(Stdio::null()).status().is_ok_and(|status| status.success()) {
+        if engine_command(candidate).arg("info").stdout(Stdio::null()).stderr(Stdio::null()).status().is_ok_and(|status| status.success()) {
             return Some(candidate.to_string());
         }
     }
@@ -199,7 +214,7 @@ fn detect_engine() -> Option<String> {
 }
 
 fn image_exists(engine: &str) -> bool {
-    Command::new(engine).args(["image", "inspect", RUNNER_IMAGE]).stdout(Stdio::null()).stderr(Stdio::null())
+    engine_command(engine).args(["image", "inspect", RUNNER_IMAGE]).stdout(Stdio::null()).stderr(Stdio::null())
         .status().is_ok_and(|status| status.success())
 }
 
@@ -208,7 +223,7 @@ fn setup_sandbox_blocking(app: &AppHandle) -> Result<SandboxStatus, String> {
     let runner_dir = runner_resources(app)?;
     let dockerfile = runner_dir.join("Dockerfile");
     if !dockerfile.is_file() { return Err(format!("Runner image recipe was not found at {}.", dockerfile.display())); }
-    let output = Command::new(&engine).args(["build", "--pull", "--tag", RUNNER_IMAGE, "--file"])
+    let output = engine_command(&engine).args(["build", "--pull", "--tag", RUNNER_IMAGE, "--file"])
         .arg(&dockerfile).arg(&runner_dir).output()
         .map_err(|error| format!("Could not start {engine}: {error}"))?;
     if !output.status.success() {
@@ -250,12 +265,14 @@ fn run_code_blocking(request: RunRequest) -> Result<RunResult, String> {
     let cases = serde_json::to_vec(&request.cases).map_err(|error| format!("Could not encode examples: {error}"))?;
     let archive = make_tar(&[(format!("main.{extension}"), request.source.as_bytes().to_vec()), ("cases.json".to_string(), cases)])?;
     let run_name = format!("jwsdc-{}-{}", std::process::id(), unique_suffix());
-    let mut command = Command::new(&engine);
+    let mut command = engine_command(&engine);
     command.args([
         "run", "--rm", "--name", &run_name,
         "--network=none", "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges",
         "--pids-limit=64", "--memory=256m", "--cpus=1", "--user=65534:65534",
-        "--tmpfs", "/workspace:rw,noexec,nosuid,size=8m", "--tmpfs", "/tmp:rw,noexec,nosuid,size=16m",
+        // Docker Desktop can mount tmpfs as root-owned 0755. The container runs
+        // as uid 65534, so explicitly grant it write access to the private workspace.
+        "--tmpfs", "/workspace:rw,noexec,nosuid,size=8m,mode=1777", "--tmpfs", "/tmp:rw,noexec,nosuid,size=16m",
         "--ulimit", "nofile=128:128", "--ulimit", "fsize=1048576:1048576", "-i", RUNNER_IMAGE,
     ]);
     match language {
@@ -353,8 +370,8 @@ fn message_for_exit(exit: &str, stderr: &str) -> String {
 }
 
 fn stop_container(engine: &str, name: &str) {
-    let _ = Command::new(engine).args(["kill", name]).stdout(Stdio::null()).stderr(Stdio::null()).status();
-    let _ = Command::new(engine).args(["rm", "--force", name]).stdout(Stdio::null()).stderr(Stdio::null()).status();
+    let _ = engine_command(engine).args(["kill", name]).stdout(Stdio::null()).stderr(Stdio::null()).status();
+    let _ = engine_command(engine).args(["rm", "--force", name]).stdout(Stdio::null()).stderr(Stdio::null()).status();
 }
 
 fn unique_suffix() -> u128 {

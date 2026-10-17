@@ -131,6 +131,13 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .runner-header { flex: 0 0 38px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #292a2c; }
 .runner-title { display: flex; align-items: center; color: #d5dcd6; }
 .runner-title svg { color: #b7bbc0; }
+.runner-status { min-width: 0; display: flex; align-items: center; gap: 7px; color: #c4c7ca; font-size: 11px; }
+.runner-status svg { flex: 0 0 auto; color: #c4c7ca; }
+.runner-status > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.runner-elapsed { min-width: 25px; color: #8e9296; font-variant-numeric: tabular-nums; text-align: right; }
+.runner-progress { position: relative; height: 2px; overflow: hidden; background: #242527; }
+.runner-progress span { position: absolute; inset: 0 auto 0 -34%; width: 34%; background: #c4c7ca; animation: runner-progress 1.35s ease-in-out infinite; }
+@keyframes runner-progress { 0% { transform: translateX(0); } 100% { transform: translateX(395%); } }
 .runner-not-ready { flex: 1; display: flex; }
 .runner-not-ready-icon { flex: 0 0 31px; border-radius: 6px; }
 .runner-not-ready-copy { min-width: 0; flex: 1; }
@@ -167,6 +174,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .empty-state svg { color: #a1a4a7; }
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .runner-progress span { animation-duration: 3s; } }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
 
 @layer components {

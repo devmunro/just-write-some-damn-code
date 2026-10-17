@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { invoke } from '@tauri-apps/api/core';
   import { BookOpen, Bot, Braces, Check, CheckCircle2, ChevronDown, Circle, Code2, Container, Dices, FileCode2, History, ListFilter, Loader2, MessageSquareText, PanelLeftClose, PanelLeftOpen, Play, Search, Settings2, Sparkles, Terminal, X } from '@lucide/svelte';
   import CodeEditor from '$lib/components/CodeEditor.svelte';
@@ -52,6 +52,9 @@
   let loading = false;
   let isRunning = false;
   let isSettingUp = false;
+  let runnerElapsedSeconds = 0;
+  let runnerStartedAt = 0;
+  let runnerTimer: ReturnType<typeof setInterval> | undefined;
   let isGenerating = false;
   let isReviewing = false;
   let showSettings = false;
@@ -92,6 +95,23 @@
     await refreshSandbox();
     await selectExercise(DSA_EXERCISES[0]);
   });
+
+  onDestroy(stopRunnerTimer);
+
+  function startRunnerTimer() {
+    stopRunnerTimer();
+    runnerElapsedSeconds = 0;
+    runnerStartedAt = Date.now();
+    runnerTimer = setInterval(() => {
+      runnerElapsedSeconds = Math.floor((Date.now() - runnerStartedAt) / 1000);
+    }, 250);
+  }
+
+  function stopRunnerTimer() {
+    if (runnerTimer) clearInterval(runnerTimer);
+    runnerTimer = undefined;
+    runnerStartedAt = 0;
+  }
 
   async function selectExercise(exercise?: Exercise) {
     if (!exercise) return;
@@ -171,17 +191,17 @@
   }
 
   async function setupSandbox() {
-    isSettingUp = true; error = ''; notice = '';
+    isSettingUp = true; startRunnerTimer(); error = ''; notice = '';
     try {
       sandbox = await invoke<SandboxStatus>('setup_sandbox');
       notice = sandbox.imageAvailable ? 'The local runner is ready.' : 'Runner setup finished, but the image was not found.';
     } catch (cause) { error = cause instanceof Error ? cause.message : String(cause); }
-    finally { isSettingUp = false; }
+    finally { isSettingUp = false; stopRunnerTimer(); }
   }
 
   async function runExamples() {
     if (!selectedExercise) return;
-    error = ''; notice = ''; result = null; isRunning = true;
+    error = ''; notice = ''; result = null; isRunning = true; startRunnerTimer();
     try {
       if (!isTauriRuntime()) throw new Error('Run is available in the desktop app after setting up its local container runner. You can still write and save code here.');
       const request: RunRequest = { exerciseId: selectedExercise.id, language: editorLanguage, source: submission, cases: selectedExercise.examples };
@@ -196,7 +216,7 @@
         }
       }
     } catch (cause) { error = cause instanceof Error ? cause.message : String(cause); }
-    finally { isRunning = false; }
+    finally { isRunning = false; stopRunnerTimer(); }
   }
 
   async function requestVariant() {
@@ -398,7 +418,10 @@
       {#if notice}<div class="message-banner notice-banner"><CheckCircle2 size={15} /><span>{notice}</span><button on:click={() => (notice = '')} aria-label="Dismiss message"><X size={13} /></button></div>{/if}
 
       <div class="runner-panel">
-        <div class="runner-header"><div class="runner-title"><Terminal size={16} /><strong>Run code</strong></div></div>
+        <div class="runner-header"><div class="runner-title"><Terminal size={16} /><strong>Run code</strong></div>
+          {#if isRunning || isSettingUp}<div class="runner-status" role="status" aria-live="polite"><Loader2 class="spin" size={13} /><span>{isSettingUp ? 'Building the local runner image' : 'Running your code in an isolated container'}</span><span class="runner-elapsed">{runnerElapsedSeconds}s</span></div>{/if}
+        </div>
+        {#if isRunning || isSettingUp}<div class="runner-progress" role="progressbar" aria-label={isSettingUp ? 'Building local runner image' : 'Running examples'} aria-valuetext="In progress"><span></span></div>{/if}
         {#if result}
           <div class="run-result" class:result-pass={result.status === 'passed'} class:result-fail={result.status !== 'passed'}>
             <div class="result-summary"><span class="result-symbol">{#if result.status === 'passed'}<CheckCircle2 size={16} />{:else}<X size={16} />{/if}</span><strong>{result.status === 'passed' ? 'Examples passed' : result.status === 'timeout' ? 'Run timed out' : result.status === 'error' ? 'Run error' : 'Some examples failed'}</strong><span>{result.cases.filter((item) => item.passed).length} of {result.cases.length} examples passed</span><span class="result-duration">{result.durationMs} ms</span><button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button></div>
