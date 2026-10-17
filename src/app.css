@@ -244,15 +244,15 @@ html, body { background: #000; }
 .app-shell { min-height: 0; background: #000; }
 .topbar { height: 76px; flex-basis: 76px; padding: 0 18px; background: #000; border-bottom-color: #202020; }
 .brand-lockup { min-width: auto; gap: 0; white-space: nowrap; }
-.brand-name { display: flex; align-items: baseline; gap: 14px; color: #f1f1ec; font-family: var(--font-display); font-size: 34px; font-weight: 900; letter-spacing: .07em; line-height: 1; }
-.brand-just { display: inline-block; color: #d1d4d7; font-size: 27px; font-weight: 850; letter-spacing: .15em; text-shadow: 0 2px 0 #4c5358, 2px 3px 0 #171819; transform: skew(-11deg) rotate(-5deg) translateY(2px); transform-origin: center bottom; }
-.brand-write { display: inline-block; background: linear-gradient(180deg, #fff 0%, #aeb8c0 22%, #f4f6f7 42%, #66737d 57%, #f7f8f9 73%, #87949d 100%); background-clip: text; color: transparent; font-size: 42px; font-weight: 1000; letter-spacing: .1em; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 0 #343a3e) drop-shadow(0 5px 8px rgba(255,255,255,.12)); transform: skew(-9deg) rotate(-1.8deg) translateY(-3px); transform-origin: center bottom; }
-.brand-some { display: inline-block; color: #d9dde0; font-family: Georgia, "Times New Roman", serif; font-size: 27px; font-style: italic; font-weight: 800; letter-spacing: .1em; text-shadow: 0 2px 0 #454b4f; transform: skew(-7deg) rotate(4deg) translateY(3px); transform-origin: center bottom; }
-.brand-some::before { content: '✦'; display: inline-block; margin-right: 4px; color: #ff5747; font-family: var(--font-display); font-size: .56em; font-style: normal; text-shadow: 0 0 9px rgba(255,72,56,.45); transform: rotate(-12deg) translateY(-.42em); }
-.brand-some::after { content: '!'; display: inline-block; margin-left: 2px; color: #ff6958; font-family: var(--font-display); font-size: .74em; font-style: normal; transform: rotate(9deg) translateY(-.2em); }
+.brand-name { display: block; color: #f1f1ec; font-family: var(--font-display); font-size: 34px; font-weight: 900; letter-spacing: 0; line-height: 1; white-space: nowrap; }
+.brand-name > span { display: inline-block; vertical-align: baseline; }
+.brand-just { color: #d1d4d7; font-size: 27px; font-weight: 850; letter-spacing: .08em; text-shadow: 2px 2px 0 #ff5747, 4px 4px 0 #171819; transform: skew(-7deg) rotate(-4deg) translateY(2px); transform-origin: center bottom; }
+.brand-write { background: linear-gradient(180deg, #fff 0%, #aeb8c0 22%, #f4f6f7 42%, #66737d 57%, #f7f8f9 73%, #87949d 100%); background-clip: text; color: transparent; font-size: 42px; font-weight: 1000; letter-spacing: .04em; -webkit-text-fill-color: transparent; filter: drop-shadow(2px 1px 0 #ff5747) drop-shadow(0 5px 8px rgba(255,255,255,.12)); transform: skew(-5deg) rotate(-1deg) translateY(-3px); transform-origin: center bottom; }
+.brand-some { color: #f2d3a0; font-family: Georgia, "Times New Roman", serif; font-size: 27px; font-style: italic; font-weight: 900; letter-spacing: .04em; text-shadow: 2px 2px 0 #a72b23, 3px 4px 0 #171819; transform: rotate(2deg) translateY(2px); transform-origin: center bottom; }
 .brand-damn { display: inline-block; padding: 5px 10px 4px; border: 1px solid #ffb0a2; color: #080808; background: linear-gradient(155deg, #ff8874 0%, #ff5747 38%, #d92e25 72%, #ff6958 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.62), 0 3px 0 #81251e, 0 0 18px rgba(255,72,56,.2); font-size: 39px; font-weight: 1000; letter-spacing: .005em; line-height: .95; text-shadow: 0 1px 0 rgba(255,255,255,.35); transform: none; }
-.brand-code { display: inline-block; position: relative; background: linear-gradient(180deg, #fff 0%, #a3afb7 26%, #f4f6f7 43%, #65717a 59%, #e5e9eb 77%, #87939b 100%); background-clip: text; color: transparent; font-family: var(--font-code-label); font-size: 34px; font-weight: 1000; letter-spacing: .08em; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 0 #343a3e); transform: skew(8deg) rotate(2deg) translateY(2px); transform-origin: center bottom; }
+.brand-code { position: relative; background: linear-gradient(180deg, #fff 0%, #a3afb7 26%, #f4f6f7 43%, #65717a 59%, #e5e9eb 77%, #87939b 100%); background-clip: text; color: transparent; font-family: var(--font-code-label); font-size: 34px; font-weight: 1000; letter-spacing: .04em; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 0 #343a3e); transform: skew(4deg) rotate(1deg) translateY(2px); transform-origin: center bottom; }
 .brand-code::after { content: ''; position: absolute; right: 0; bottom: -4px; left: 1px; height: 2px; background: linear-gradient(90deg, #ff5747, #aab3b9 72%, transparent); transform: skew(-16deg); }
+.brand-insult { color: #ff7965; font-family: Georgia, "Times New Roman", serif; font-size: 16px; font-style: italic; font-weight: 900; letter-spacing: .01em; text-shadow: 2px 2px 0 #77251f; transform: rotate(-2deg) translateY(-1px); }
 .topbar-actions { min-width: auto; }
 .workspace-grid { grid-template-columns: 254px minmax(0, 1fr); background: #000; }
 .sidebar { background: #000; border-right-color: #202020; }
@@ -455,17 +455,12 @@ html, body { background: #000; }
 
 @media (max-width: 650px) {
   .topbar { height: 58px; flex-basis: 58px; padding: 0 9px; }
-  .brand-lockup { gap: 7px; }
-  .brand-name { gap: 7px; }
   .brand-just { font-size: 13px; }
   .brand-write { font-size: 19px; }
   .brand-some { font-size: 13px; }
   .brand-damn { padding: 3px 5px 2px; font-size: 22px; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 2px 0 #81251e; }
   .brand-code { font-size: 17px; }
-}
-
-@media (max-width: 390px) {
-  .brand-some { display: none; }
+  .brand-insult { font-size: 9px; }
 }
 
 /* Sidebar layout and clearer action marks */
@@ -536,13 +531,12 @@ html, body { background: #000; }
 @media (max-width: 650px) {
   .topbar { height: 60px; flex-basis: 60px; }
   .topbar-brand-group { gap: 6px; }
-  .brand-lockup { gap: 7px; }
-  .brand-name { gap: 7px; }
   .brand-just { font-size: 13px; }
   .brand-write { font-size: 19px; }
   .brand-some { font-size: 13px; }
   .brand-damn { padding: 3px 5px 2px; font-size: 22px; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 2px 0 #81251e; }
   .brand-code { font-size: 17px; }
+  .brand-insult { font-size: 9px; }
   .runner-header { padding: 0 9px; }
   .runner-title { gap: 5px; }
   .runner-not-ready { padding-left: 30px; }
@@ -553,4 +547,13 @@ html, body { background: #000; }
   .exercise-row { min-height: 42px; }
   .exercise-row-title { font-size: 11px; }
   .exercise-difficulty { padding: 3px 4px; font-size: 7px; }
+}
+
+@media (max-width: 390px) {
+  .brand-just { font-size: 9px; }
+  .brand-write { font-size: 12px; }
+  .brand-some { font-size: 9px; }
+  .brand-damn { padding: 2px 3px 1px; font-size: 15px; }
+  .brand-code { font-size: 10px; }
+  .brand-insult { font-size: 8px; }
 }
