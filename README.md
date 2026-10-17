@@ -59,7 +59,7 @@ Open the [release page](https://github.com/devmunro/just-write-some-damn-code/re
 - **Mac with Apple silicon:** the `aarch64.dmg` installer.
 - **Mac with Intel:** the `x64.dmg` installer.
 
-On Mac, open the DMG and drag **Just Write Some Damn Code** into Applications. On Windows, run the setup installer. These alpha builds are not signed by a commercial publisher; Windows SmartScreen or macOS Gatekeeper may ask you to confirm the app the first time you open it. SHA-256 checksum files are attached to each release.
+On Mac, open the DMG and drag **Just Write Some Damn Code** into Applications. On Windows, run the setup installer. These alpha builds are not signed by a commercial publisher; Windows SmartScreen or macOS Gatekeeper may ask you to confirm the app the first time you open it. On Mac, allow the app from **System Settings → Privacy & Security** if Gatekeeper blocks it. SHA-256 checksum files are attached to each release.
 
 Installing the app does not require Node.js or Rust. To run code examples, install and start [Podman](https://podman.io/docs/installation) or [Docker](https://docs.docker.com/get-started/get-docker/) and choose **Set up runner** in the app. Browsing, writing, and local drafts work without a container engine.
 
