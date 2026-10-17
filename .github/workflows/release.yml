@@ -1,0 +1,134 @@
+name: Build desktop installers
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate frontend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Svelte and TypeScript
+        run: npm run check
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Build frontend
+        run: npm run build
+
+  installers:
+    name: Build ${{ matrix.platform-name }} installer
+    needs: validate
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-latest
+            platform-name: Windows x64
+            asset-name: windows-x64
+            bundles: nsis
+          - runner: macos-15
+            platform-name: macOS Apple silicon
+            asset-name: macos-aarch64
+            bundles: dmg
+          - runner: macos-15-intel
+            platform-name: macOS Intel
+            asset-name: macos-x64
+            bundles: dmg
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build artifacts
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build and attach installer
+        id: tauri
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: Just Write Some Damn Code ${{ github.ref_name }}
+          releaseBody: |
+            Install the desktop app using the package for your computer:
+
+            - Windows x64: `*-x64-setup.exe`
+            - Mac with Apple silicon: `*aarch64*.dmg`
+            - Mac with Intel: `*x64*.dmg`
+
+            SHA-256 checksum files are included. These alpha builds are not commercially signed or notarized; the first launch may require an operating-system security confirmation.
+          releaseDraft: false
+          prerelease: true
+          uploadUpdaterJson: false
+          retryAttempts: 3
+          args: --bundles ${{ matrix.bundles }}
+
+      - name: Create and upload installer checksum
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ASSET_PLATFORM: ${{ matrix.asset-name }}
+          GITHUB_RELEASE_REPOSITORY: ${{ github.repository }}
+          GITHUB_RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          shopt -s globstar nullglob
+          installers=(src-tauri/target/release/bundle/**/*.exe src-tauri/target/release/bundle/**/*.dmg)
+          if ((${#installers[@]} == 0)); then
+            echo "No installer was produced."
+            exit 1
+          fi
+
+          manifest="SHA256SUMS-${ASSET_PLATFORM}.txt"
+          node - "$manifest" "${installers[@]}" <<'NODE'
+          const { createHash } = require('node:crypto');
+          const { readFileSync, writeFileSync } = require('node:fs');
+          const { basename } = require('node:path');
+          const [manifest, ...files] = process.argv.slice(2);
+          const entries = files.map((file) => {
+            const digest = createHash('sha256').update(readFileSync(file)).digest('hex');
+            return `${digest}  ${basename(file)}`;
+          });
+          writeFileSync(manifest, `${entries.join('\n')}\n`);
+          NODE
+
+          gh release upload "$GITHUB_RELEASE_TAG" "$manifest" --repo "$GITHUB_RELEASE_REPOSITORY" --clobber

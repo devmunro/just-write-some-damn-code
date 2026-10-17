@@ -2,6 +2,12 @@
 
 Notable changes to Just Write Some Damn Code are recorded here.
 
+## [0.1.0-alpha.2] — 2026-10-17
+
+- Add Windows x64 and macOS Apple silicon and Intel installers to GitHub releases.
+- Add SHA-256 checksum files for the installers.
+- Document download and first-launch steps for the desktop app.
+
 ## [0.1.0-alpha.1] — 2026-10-17
 
 First public source alpha.

@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/devmunro/just-write-some-damn-code/releases/tag/v0.1.0-alpha.1"><img src="https://img.shields.io/badge/status-v0.1.0--alpha.1-ff5948?style=for-the-badge" alt="Version 0.1.0 alpha 1" /></a>
+  <a href="https://github.com/devmunro/just-write-some-damn-code/releases"><img src="https://img.shields.io/github/v/release/devmunro/just-write-some-damn-code?include_prereleases&style=for-the-badge" alt="Latest release" /></a>
   <a href="https://github.com/devmunro/just-write-some-damn-code/actions/workflows/validate.yml"><img src="https://img.shields.io/github/actions/workflow/status/devmunro/just-write-some-damn-code/validate.yml?branch=main&style=for-the-badge&label=checks" alt="Frontend validation workflow status" /></a>
   <img src="https://img.shields.io/badge/desktop-Tauri%202-ffc131?style=for-the-badge&logo=tauri&logoColor=111" alt="Tauri 2 desktop app" />
   <img src="https://img.shields.io/badge/interface-Svelte%205-ff3e00?style=for-the-badge&logo=svelte&logoColor=fff" alt="Svelte 5 interface" />
@@ -15,7 +15,7 @@
 
 **A desktop practice space for people who want to keep their coding skills sharp.** Pick a challenge, write the code yourself, and run it against examples. Syntax highlighting and editor conveniences are there; AI completions, answer keys, starter solutions, scores, and leaderboards are not.
 
-> **Alpha software:** this is a source release for early testing. No ready-to-install desktop packages are attached yet. The native app and container runner still need validation on Windows, macOS, and Linux.
+> **Alpha software:** the release page provides installable Windows and macOS packages. The runner still needs cross-platform validation.
 
 ## The workspace
 
@@ -51,7 +51,19 @@ The desktop app uses a disposable local Podman or Docker container for the runne
 
 The first setup builds the local `jwsdc-runner:1.0.0` image and downloads its base image and language runtimes. After setup, runs have no network access. The container uses a read-only root filesystem, a temporary workspace, a non-root user, no extra Linux capabilities, and limits for CPU, memory, processes, time, and output. The runner receives the code you wrote and the selected public examples.
 
-### Install and launch
+## Download and install
+
+Open the [release page](https://github.com/devmunro/just-write-some-damn-code/releases) and download the installer for your computer:
+
+- **Windows:** the `x64-setup.exe` installer.
+- **Mac with Apple silicon:** the `aarch64.dmg` installer.
+- **Mac with Intel:** the `x64.dmg` installer.
+
+On Mac, open the DMG and drag **Just Write Some Damn Code** into Applications. On Windows, run the setup installer. These alpha builds are not signed by a commercial publisher; Windows SmartScreen or macOS Gatekeeper may ask you to confirm the app the first time you open it. SHA-256 checksum files are attached to each release.
+
+Installing the app does not require Node.js or Rust. To run code examples, install and start [Podman](https://podman.io/docs/installation) or [Docker](https://docs.docker.com/get-started/get-docker/) and choose **Set up runner** in the app. Browsing, writing, and local drafts work without a container engine.
+
+### Build from source
 
 1. Install Node.js and the [Rust toolchain](https://rustup.rs/).
 2. Install the desktop prerequisites for your operating system using the [Tauri v2 prerequisite guide](https://v2.tauri.app/start/prerequisites/).
