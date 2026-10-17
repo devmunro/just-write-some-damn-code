@@ -287,15 +287,15 @@
 <svelte:window on:keydown={handleGlobalKeydown} />
 
 <svelte:head>
-  <title>Just Write Some Damn Code, You Little Shit!</title>
+  <title>Just Write Some Damn Code!</title>
   <meta name="description" content="A local desktop practice space for writing code without AI autocomplete." />
 </svelte:head>
 
 <div class="app-shell">
   <header class="topbar">
     <div class="topbar-brand-group">
-      <div class="brand-lockup" role="img" aria-label="Just write some damn code, you little shit!">
-        <div class="brand-name" aria-hidden="true"><span class="brand-just">jUsT</span>{' '}<span class="brand-write">wRiTe</span>{' '}<span class="brand-some">some</span>{' '}<span class="brand-damn">DAMN</span>{' '}<span class="brand-code">cOdE,</span>{' '}<span class="brand-insult">you little shit!</span></div>
+      <div class="brand-lockup" role="img" aria-label="Just write some damn code!">
+        <div class="brand-name" aria-hidden="true"><span class="brand-just">jUsT</span>{' '}<span class="brand-write">wRiTe</span>{' '}<span class="brand-some">some</span>{' '}<span class="brand-damn">DAMN</span>{' '}<span class="brand-code">cOdE!</span></div>
       </div>
     </div>
     <div class="topbar-actions">

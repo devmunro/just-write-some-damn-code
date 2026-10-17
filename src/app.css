@@ -252,7 +252,6 @@ html, body { background: #000; }
 .brand-damn { display: inline-block; padding: 5px 10px 4px; border: 1px solid #ffb0a2; color: #080808; background: linear-gradient(155deg, #ff8874 0%, #ff5747 38%, #d92e25 72%, #ff6958 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.62), 0 3px 0 #81251e, 0 0 18px rgba(255,72,56,.2); font-size: 39px; font-weight: 1000; letter-spacing: .005em; line-height: .95; text-shadow: 0 1px 0 rgba(255,255,255,.35); transform: none; }
 .brand-code { position: relative; background: linear-gradient(180deg, #fff 0%, #a3afb7 26%, #f4f6f7 43%, #65717a 59%, #e5e9eb 77%, #87939b 100%); background-clip: text; color: transparent; font-family: var(--font-code-label); font-size: 34px; font-weight: 1000; letter-spacing: .04em; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 0 #343a3e); transform: skew(4deg) rotate(1deg) translateY(2px); transform-origin: center bottom; }
 .brand-code::after { content: ''; position: absolute; right: 0; bottom: -4px; left: 1px; height: 2px; background: linear-gradient(90deg, #ff5747, #aab3b9 72%, transparent); transform: skew(-16deg); }
-.brand-insult { color: #ff7965; font-family: Georgia, "Times New Roman", serif; font-size: 16px; font-style: italic; font-weight: 900; letter-spacing: .01em; text-shadow: 2px 2px 0 #77251f; transform: rotate(-2deg) translateY(-1px); }
 .topbar-actions { min-width: auto; }
 .workspace-grid { grid-template-columns: 254px minmax(0, 1fr); background: #000; }
 .sidebar { background: #000; border-right-color: #202020; }
@@ -460,7 +459,6 @@ html, body { background: #000; }
   .brand-some { font-size: 13px; }
   .brand-damn { padding: 3px 5px 2px; font-size: 22px; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 2px 0 #81251e; }
   .brand-code { font-size: 17px; }
-  .brand-insult { font-size: 9px; }
 }
 
 /* Sidebar layout and clearer action marks */
@@ -536,7 +534,6 @@ html, body { background: #000; }
   .brand-some { font-size: 13px; }
   .brand-damn { padding: 3px 5px 2px; font-size: 22px; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 2px 0 #81251e; }
   .brand-code { font-size: 17px; }
-  .brand-insult { font-size: 9px; }
   .runner-header { padding: 0 9px; }
   .runner-title { gap: 5px; }
   .runner-not-ready { padding-left: 30px; }
@@ -555,5 +552,4 @@ html, body { background: #000; }
   .brand-some { font-size: 9px; }
   .brand-damn { padding: 2px 3px 1px; font-size: 15px; }
   .brand-code { font-size: 10px; }
-  .brand-insult { font-size: 8px; }
 }
