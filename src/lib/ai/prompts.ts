@@ -6,7 +6,7 @@ export type OllamaMessage = { role: 'system' | 'user'; content: string };
 export function buildVariantPrompt(exercise: Exercise): OllamaMessage[] {
   return [
     { role: 'system', content: 'Create a new original coding exercise variant. Do not give a solution, code, pseudocode, starter implementation, answer key, or hidden solution field. Use strict JSON only.' },
-    { role: 'user', content: `Create a variant of this practice exercise. Keep the same underlying concept and JSON solve(input) contract, but use a fresh context and examples. The app will label the result AI-generated.\nBase topic: ${exercise.topic}\nDifficulty: ${exercise.difficulty}\nBase prompt: ${exercise.prompt}\nConstraints: ${exercise.constraints.join('; ')}\nDo not quote or reproduce an external problem statement.\nReturn exactly this shape: {"title":"...","prompt":"...","tags":["..."],"constraints":["..."],"examples":[{"label":"Example 1","input":{},"expectedOutput":{}}]}. Include 2 or 3 valid examples.` }
+    { role: 'user', content: `Create a variant of this practice exercise. Keep the same underlying concept and function signature solve(${exercise.parameters.join(', ')}), but use a fresh context and cases. The prompt must describe normal function arguments and the requested return value. Do not mention JSON, serialized input objects, parsing, stdin, or the app's runner format. The app will label the result AI-generated.\nBase topic: ${exercise.topic}\nDifficulty: ${exercise.difficulty}\nBase prompt: ${exercise.prompt}\nConstraints: ${exercise.constraints.join('; ')}\nDo not quote or reproduce an external problem statement.\nReturn exactly this internal shape: {"title":"...","prompt":"...","tags":["..."],"constraints":["..."],"examples":[{"label":"Example 1","input":{"${exercise.parameters[0] ?? 'value'}":"..."},"expectedOutput":"..."}],"hiddenCases":[{"input":{"${exercise.parameters[0] ?? 'value'}":"..."},"expectedOutput":"..."}]}. Include 2 or 3 visible examples and 1 or 2 hidden cases. Each input object must use these named arguments: ${exercise.parameters.join(', ')}.` }
   ];
 }
 
@@ -43,15 +43,27 @@ export function normalizeGeneratedVariant(value: unknown, base: Exercise): Gener
   const prompt = text(raw.prompt, 4000);
   const tags = stringList(raw.tags, 8);
   const constraints = stringList(raw.constraints, 8);
+  if (/solve\(input\)|JSON input|input object|parse JSON|JSON value|return JSON/i.test(`${prompt}\n${constraints.join('\n')}`)) {
+    throw new Error('The generated exercise describes the runner format instead of a normal function. Try again.');
+  }
   if (!Array.isArray(raw.examples) || raw.examples.length < 2 || raw.examples.length > 3) throw new Error('The generated variant needs two or three examples.');
-  const examples = raw.examples.map((entry, index) => {
+  if (!Array.isArray(raw.hiddenCases) || raw.hiddenCases.length < 1 || raw.hiddenCases.length > 2) throw new Error('The generated variant needs one or two hidden tests.');
+  const normalizeCases = (entries: unknown[], prefix: string, hidden: boolean) => entries.map((entry, index) => {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)) throw new Error(`Example ${index + 1} is invalid.`);
     const example = entry as Record<string, unknown>;
-    if (!('input' in example) || !('expectedOutput' in example) || !isJsonValue(example.input) || !isJsonValue(example.expectedOutput)) throw new Error(`Example ${index + 1} must contain valid JSON input and output.`);
-    return { id: `variant-${index + 1}`, label: typeof example.label === 'string' ? example.label.slice(0, 50) : `Example ${index + 1}`, input: example.input as JsonValue, expectedOutput: example.expectedOutput as JsonValue };
+    if (!isNamedArguments(example.input, base.parameters) || !('expectedOutput' in example) || !isJsonValue(example.expectedOutput)) throw new Error(`Example ${index + 1} must use the exercise's named arguments and include an expected result.`);
+    return { id: `${prefix}-${index + 1}`, label: hidden ? `Hidden test ${index + 1}` : typeof example.label === 'string' ? example.label.slice(0, 50) : `Example ${index + 1}`, input: example.input as Record<string, JsonValue>, expectedOutput: example.expectedOutput as JsonValue, hidden };
   });
+  const examples = normalizeCases(raw.examples, 'variant-example', false);
+  const hiddenCases = normalizeCases(raw.hiddenCases, 'variant-hidden', true);
   const id = `variant-${crypto.randomUUID()}`;
-  return { id, kind: base.kind, topic: base.topic, title, difficulty: base.difficulty, tags, prompt, constraints, examples, estimatedMinutes: base.estimatedMinutes, generatedBy: 'ollama', generatedAt: new Date().toISOString(), sourceExerciseId: base.id };
+  return { id, kind: base.kind, topic: base.topic, title, difficulty: base.difficulty, parameters: base.parameters, tags, prompt, constraints, examples, hiddenCases, estimatedMinutes: base.estimatedMinutes, generatedBy: 'ollama', generatedAt: new Date().toISOString(), sourceExerciseId: base.id };
+}
+
+function isNamedArguments(value: unknown, parameters: string[]): value is Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const keys = Object.keys(value);
+  return keys.length === parameters.length && parameters.every((name) => Object.hasOwn(value, name) && isJsonValue((value as Record<string, unknown>)[name]));
 }
 
 function text(value: unknown, max: number): string {

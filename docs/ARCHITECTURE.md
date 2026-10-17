@@ -4,7 +4,7 @@
 
 1. Browse the built-in original DSA curriculum or one of the single-file build briefs.
 2. Choose a language and write a solution in Monaco. No solution or starter code is shipped.
-3. Optionally run the public examples in the desktop container sandbox.
+3. Optionally run the visible examples and hidden tests in the desktop container sandbox.
 4. Optionally ask local Ollama for a fresh variant or qualitative feedback.
 5. Keep the latest draft and exercise status on this device.
 
@@ -46,9 +46,9 @@ The old browser settings key is migrated to the local settings shape. Gemini pro
 
 ## Run protocol
 
-Every runnable brief has `solve(input) -> JSON` and public JSON cases. The Rust command validates the language, source and case sizes, then packages only those values into an in-memory tar stream. It does not create a host-side source file.
+Every runnable brief names the parameters for `solve(...)`, includes visible examples and hidden edge cases, and compares the returned result. Case values are stored in an internal serialized format; the runner expands named arguments and calls the user's function directly. Hidden case details are removed from the result before it reaches the interface. The Rust command validates the language, source and case sizes, then packages the suite into an in-memory tar stream. It does not create a host-side source file.
 
-The app setup action builds `jwsdc-runner:1.0.0`. A run starts that image with networking disabled, read-only root, a temporary workspace, no extra capabilities, a non-root UID, PID/CPU/memory/output limits, and a four second wall-clock timeout. The runner process is killed and its named container is removed if it times out or exceeds output limits. AI responses are never passed to this command.
+The app setup action builds `jwsdc-runner:1.1.0`. A run starts that image with networking disabled, read-only root, a temporary workspace, no extra capabilities, a non-root UID, PID/CPU/memory/output limits, and a four second wall-clock timeout. The runner process is killed and its named container is removed if it times out or exceeds output limits. AI responses are never passed to this command.
 
 ## Content and licensing
 
@@ -63,7 +63,7 @@ The app should be able to grow into voice-authored challenges and richer project
 - **Challenge intake:** A future `ChallengeRequest` should be independent of how the user supplied the idea. Text and an edited voice transcript can both become the same request: goal, topic, difficulty, language, project size, constraints, and requested capabilities. Voice is an optional input adapter; it must not be required to browse, write, or run existing exercises.
 - **Voice capture:** Start microphone capture only after an explicit user action. Convert speech to a transcript with an optional local speech-to-text adapter, show the transcript for editing, then pass the confirmed text to challenge generation. Discard raw audio when transcription completes; storing recordings would require a separate user-facing choice. Keep the transcript usable as ordinary text if local speech recognition is unavailable.
 - **Retrieval and generation:** Put retrieval behind an `ExerciseRetriever` boundary and generation behind a `ChallengeGenerator` boundary. The local index can grow from authored exercises and pattern guides to user-added content packs, with source and license metadata. Keep the existing local Ollama integration as one generator adapter. A generated challenge is an untrusted candidate: validate its schema, size, difficulty, language, examples, and execution profile before showing or saving it. Mark its provenance clearly. Never turn generated source code into an implementation or execute it as the learner’s submission.
-- **Exercise formats:** Treat the current `solve(input) -> JSON` contract as one execution profile. Future profiles can describe a multi-file project, a local HTTP server, or a WebSocket task without changing the meaning of the current profile. Store profile and required capabilities as data on a future challenge bundle so the UI can explain what will run before the user starts it.
+- **Exercise formats:** Treat the current function signature and test suite as one execution profile. Future profiles can describe a multi-file project, a local HTTP server, or a WebSocket task without changing the meaning of the current profile. Store profile and required capabilities as data on a future challenge bundle so the UI can explain what will run before the user starts it.
 - **Evaluation and feedback:** Keep the Tauri runner as the execution boundary. Evolve `RunRequest` and `RunResult` through versioned profile-specific data rather than letting the UI start arbitrary processes. The runner should receive user code, bounded test data, and fixed app-owned harnesses; validate resource limits and network policy on the host side. The runner owns deterministic pass/fail results. AI may propose extra JSON input cases, but generated expected outputs are untrusted and must be labeled as experimental unless independently verified. After a user asks, AI feedback can review the submission alongside structured run evidence; it must not override runner results or turn them into a score.
 - **Local storage:** Persist a user-saved generated challenge as a versioned local content record with its source request and provenance. Keep unsaved variants session-only, and keep recordings and feedback out of persistent storage by default. Database changes should be additive migrations so existing drafts and progress remain intact.
 

@@ -25,8 +25,9 @@ export type JsonValue = null | boolean | number | string | JsonValue[] | { [key:
 export type ExampleCase = {
   id: string;
   label: string;
-  input: JsonValue;
+  input: Record<string, JsonValue>;
   expectedOutput: JsonValue;
+  hidden?: boolean;
 };
 
 export type Exercise = {
@@ -35,10 +36,12 @@ export type Exercise = {
   topic: DsaTopic | 'Single-file builds';
   title: string;
   difficulty: Difficulty;
+  parameters: string[];
   tags: string[];
   prompt: string;
   constraints: string[];
   examples: ExampleCase[];
+  hiddenCases: ExampleCase[];
   estimatedMinutes: number;
 };
 
@@ -46,6 +49,7 @@ export type RunRequest = {
   exerciseId: string;
   language: PracticeLanguage;
   source: string;
+  parameters: string[];
   cases: ExampleCase[];
 };
 
@@ -53,14 +57,15 @@ export type RunCaseResult = {
   id: string;
   label: string;
   passed: boolean;
+  hidden: boolean;
+  runtimeError: boolean;
   actualOutput?: JsonValue;
   error?: string;
 };
 
 export type RunResult = {
-  status: 'passed' | 'failed' | 'error' | 'timeout' | 'unavailable';
+  status: 'success' | 'incorrect_answer' | 'runtime_error' | 'timeout';
   cases: RunCaseResult[];
-  stdout: string;
   stderr: string;
   durationMs: number;
   message?: string;

@@ -169,6 +169,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .case-fail { color: #ef9f94; background: #3a2624; }
 .case-actual { overflow: hidden; color: #d9a49c; text-overflow: ellipsis; white-space: nowrap; }
 .case-result code { overflow: hidden; color: #d6a49b; font-family: ui-monospace, monospace; text-overflow: ellipsis; white-space: nowrap; }
+.hidden-test-summary > span:last-child { margin-left: auto; color: #aeb7af; font-size: 8px; }
 .runner-stderr { max-height: 54px; overflow: auto; margin: 5px 0 0 22px; color: #dfa49b; font-size: 8px; white-space: pre-wrap; }
 .empty-state { height: 100%; display: grid; place-content: center; justify-items: center; gap: 10px; color: #828d85; font-size: 11px; }
 .empty-state svg { color: #a1a4a7; }

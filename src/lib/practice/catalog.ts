@@ -4,17 +4,17 @@ type Blueprint = {
   topic: (typeof DSA_TOPICS)[number];
   name: string;
   focus: string;
-  input: JsonValue;
+  input: Record<string, JsonValue>;
   output: JsonValue;
-  edgeInput: JsonValue;
+  edgeInput: Record<string, JsonValue>;
   edgeOutput: JsonValue;
   contexts: string[];
 };
 
-const b = (topic: Blueprint['topic'], name: string, focus: string, input: JsonValue, output: JsonValue, edgeInput: JsonValue, edgeOutput: JsonValue, contexts: string[]): Blueprint => ({ topic, name, focus, input, output, edgeInput, edgeOutput, contexts });
+const b = (topic: Blueprint['topic'], name: string, focus: string, input: Blueprint['input'], output: JsonValue, edgeInput: Blueprint['edgeInput'], edgeOutput: JsonValue, contexts: string[]): Blueprint => ({ topic, name, focus, input, output, edgeInput, edgeOutput, contexts });
 
 // The catalog is independently authored. The contexts turn each core pattern
-// into a distinct practice brief while retaining a clear, stable JSON contract.
+// into a distinct practice brief while retaining a clear function contract.
 const blueprints: Blueprint[] = [
   b('Arrays & Hashing','Keep first occurrences','Return the input values with later duplicates removed, preserving the first-seen order.',{values:[4,2,4,1,2] as JsonValue},[4,2,1] as JsonValue,{values:[7,7,7] as JsonValue},[7] as JsonValue,['badge identifiers','parcel codes','event keys','playlist IDs','sensor labels']),
   b('Arrays & Hashing','Count each value','Return an object mapping each distinct value, represented as a string key, to its frequency.',{values:[3,1,3,2,1,3] as JsonValue},{'1':2,'2':1,'3':3} as JsonValue,{values:[] as JsonValue},{ } as JsonValue,['inventory counts','vote totals','page visits','shoe sizes','error codes']),
@@ -44,7 +44,7 @@ const blueprints: Blueprint[] = [
   b('Stacks & Queues','Daily warmer-day wait','For each temperature, return how many days until a warmer value appears, or zero if there is none.',{values:[73,74,75,71,69,72,76,73] as JsonValue},[1,1,4,2,1,1,0,0] as JsonValue,{values:[30,40,50] as JsonValue},[1,1,0] as JsonValue,['daily temperatures','machine readings','queue wait times']),
   b('Stacks & Queues','Next greater value','For each value, return the first greater value to its right, or -1 if no greater value exists.',{values:[2,1,2,4,3] as JsonValue},[4,2,4,-1,-1] as JsonValue,{values:[5,4] as JsonValue},[-1,-1] as JsonValue,['task priorities','sensor peaks','stock prices']),
   b('Stacks & Queues','Evaluate reverse Polish notation','Evaluate a valid postfix expression. Division truncates toward zero.',{tokens:['2','1','+','3','*'] as JsonValue},9,{tokens:['4','13','5','/','+'] as JsonValue},6,['calculator tape','expression logs','compiled operations']),
-  b('Stacks & Queues','Simplify an absolute path','Resolve dot segments and parent segments in a Unix-style absolute path; return one canonical absolute path.',{path:'/home//user/../docs/'} as JsonValue,'/home/docs',{path:'/../a/./b/../../c'} as JsonValue,'/c',['file paths','route paths','archive entries']),
+  b('Stacks & Queues','Simplify an absolute path','Resolve dot segments and parent segments in a Unix-style absolute path; return one canonical absolute path.',{path:'/home//user/../docs/'},'/home/docs',{path:'/../a/./b/../../c'},'/c',['file paths','route paths','archive entries']),
 
   b('Linked Lists','Reverse a linked list','The list is represented by its values in order. Return those values in reverse order.',{values:[1,2,3,4] as JsonValue},[4,3,2,1] as JsonValue,{values:[] as JsonValue},[] as JsonValue,['playlist tracks','task chains','message links']),
   b('Linked Lists','Detect a cycle marker','Given next-index pointers where -1 ends the chain, return true if following from index 0 revisits an index.',{next:[1,2,3,1] as JsonValue},true,{next:[1,2,-1] as JsonValue},false,['workflow links','dependency chains','navigation nodes']),
@@ -111,11 +111,11 @@ const difficulties: Difficulty[] = Array.from({ length: 250 }, (_, index) => {
   return spread < 75 ? 'Beginner' : spread < 200 ? 'Intermediate' : 'Advanced';
 });
 
-function makeExamples(id: string, blueprint: Blueprint): ExampleCase[] {
-  return [
-    { id: `${id}-example-1`, label: 'Example 1', input: blueprint.input, expectedOutput: blueprint.output },
-    { id: `${id}-example-2`, label: 'Example 2', input: blueprint.edgeInput, expectedOutput: blueprint.edgeOutput }
-  ];
+function makeExamples(id: string, blueprint: Blueprint): { examples: ExampleCase[]; hiddenCases: ExampleCase[] } {
+  return {
+    examples: [{ id: `${id}-example-1`, label: 'Example 1', input: blueprint.input, expectedOutput: blueprint.output }],
+    hiddenCases: [{ id: `${id}-hidden-1`, label: 'Hidden test 1', input: blueprint.edgeInput, expectedOutput: blueprint.edgeOutput, hidden: true }]
+  };
 }
 
 function slug(value: string): string {
@@ -135,16 +135,20 @@ const scenarios = blueprints.flatMap((blueprint) => blueprint.contexts.map((cont
 
 export const DSA_EXERCISES: Exercise[] = scenarios.map(({ blueprint, context, variant }, index) => {
   const id = `dsa-${slug(blueprint.topic)}-${slug(blueprint.name)}-${variant + 1}`;
+  const { examples, hiddenCases } = makeExamples(id, blueprint);
+  const parameters = Object.keys(blueprint.input);
   return {
     id,
     kind: 'dsa',
     topic: blueprint.topic,
     title: `${titleCaseContext(context)} · ${blueprint.name}`,
     difficulty: difficulties[index],
-    tags: [blueprint.topic, blueprint.name, context, 'JSON input/output'],
-    prompt: `${blueprint.focus}\n\nImplement solve(input) and return the requested JSON value. The input object contains the named arguments shown in the examples.`,
-    constraints: ['Return JSON-compatible values only.', 'Do not read from stdin or print a solution; the runner calls solve(input).', 'Aim for linear or near-linear time when the pattern allows it.'],
-    examples: makeExamples(id, blueprint),
+    parameters,
+    tags: [blueprint.topic, blueprint.name, context, 'function arguments'],
+    prompt: `${blueprint.focus}\n\nImplement solve(${parameters.join(', ')}) and return the requested result.`,
+    constraints: ['Use the parameter names shown in the function signature.', 'Write the function only; do not read from standard input or print the answer.', 'Aim for linear or near-linear time when the pattern allows it.'],
+    examples,
+    hiddenCases,
     estimatedMinutes: difficulties[index] === 'Beginner' ? 12 : difficulties[index] === 'Intermediate' ? 22 : 35
   };
 });
@@ -166,19 +170,19 @@ const buildBriefs: Array<[string, string, JsonValue, JsonValue, JsonValue, JsonV
 
 export const BUILD_EXERCISES: Exercise[] = buildBriefs.map(([name, focus, input, output, edgeInput, edgeOutput, tags, difficulty]) => {
   const id = `build-${slug(name)}`;
+  const parameters = Object.keys(input as Record<string, JsonValue>);
   return {
     id,
     kind: 'build',
     topic: 'Single-file builds',
     title: name,
     difficulty,
+    parameters,
     tags: [...tags, 'single-file build'],
-    prompt: `${focus}\n\nBuild this as a single-file utility. Implement solve(input) -> JSON and keep the behavior deterministic.`,
-    constraints: ['Use only the selected language standard library.', 'Return JSON-compatible values.', 'Keep the implementation in one file.'],
-    examples: [
-      { id: `${id}-example-1`, label: 'Example 1', input, expectedOutput: output },
-      { id: `${id}-example-2`, label: 'Example 2', input: edgeInput, expectedOutput: edgeOutput }
-    ],
+    prompt: `${focus}\n\nBuild this as a single-file utility. Implement solve(${parameters.join(', ')}) and keep the behavior deterministic.`,
+    constraints: ['Use only the selected language standard library.', 'Write the function only; do not read from standard input or print the answer.', 'Keep the implementation in one file.'],
+    examples: [{ id: `${id}-example-1`, label: 'Example 1', input: input as Record<string, JsonValue>, expectedOutput: output }],
+    hiddenCases: [{ id: `${id}-hidden-1`, label: 'Hidden test 1', input: edgeInput as Record<string, JsonValue>, expectedOutput: edgeOutput, hidden: true }],
     estimatedMinutes: difficulty === 'Beginner' ? 15 : difficulty === 'Intermediate' ? 25 : 40
   };
 });

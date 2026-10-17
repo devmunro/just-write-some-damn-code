@@ -12,7 +12,7 @@ use serde_json::Value;
 use tauri::{AppHandle, Manager};
 use url::Url;
 
-const RUNNER_IMAGE: &str = "jwsdc-runner:1.0.0";
+const RUNNER_IMAGE: &str = "jwsdc-runner:1.1.0";
 const MAX_SOURCE_BYTES: usize = 64 * 1024;
 const MAX_CASES: usize = 20;
 const MAX_JSON_BYTES: usize = 64 * 1024;
@@ -68,6 +68,7 @@ struct RunRequest {
     exercise_id: String,
     language: String,
     source: String,
+    parameters: Vec<String>,
     cases: Vec<ExampleCase>,
 }
 
@@ -78,6 +79,8 @@ struct ExampleCase {
     label: String,
     input: Value,
     expected_output: Value,
+    #[serde(default)]
+    hidden: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -86,6 +89,8 @@ struct CaseResult {
     id: String,
     label: String,
     passed: bool,
+    hidden: bool,
+    runtime_error: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     actual_output: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -97,7 +102,6 @@ struct CaseResult {
 struct RunResult {
     status: String,
     cases: Vec<CaseResult>,
-    stdout: String,
     stderr: String,
     duration_ms: u64,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -245,13 +249,25 @@ fn validate_run_request(request: &RunRequest) -> Result<(), String> {
     if !matches!(request.language.as_str(), "python" | "javascript" | "typescript" | "php") {
         return Err("Choose Python, JavaScript, TypeScript, or PHP.".to_string());
     }
-    if request.source.trim().is_empty() { return Err("Write code before running examples.".to_string()); }
+    if request.source.trim().is_empty() { return Err("Write code before running tests.".to_string()); }
     if request.source.len() > MAX_SOURCE_BYTES { return Err("Code is limited to 64 KB per run.".to_string()); }
-    if request.cases.is_empty() || request.cases.len() > MAX_CASES { return Err("A run needs between 1 and 20 examples.".to_string()); }
+    if request.parameters.is_empty() || request.parameters.len() > 10 { return Err("The exercise function signature is invalid.".to_string()); }
+    let mut unique_parameters = std::collections::HashSet::new();
+    if request.parameters.iter().any(|name| {
+        let mut chars = name.chars();
+        !chars.next().is_some_and(|first| first == '_' || first.is_ascii_alphabetic()) ||
+        !chars.all(|character| character == '_' || character.is_ascii_alphanumeric()) ||
+        !unique_parameters.insert(name)
+    }) { return Err("The exercise has invalid or duplicate function parameters.".to_string()); }
+    if request.cases.is_empty() || request.cases.len() > MAX_CASES { return Err("A run needs between 1 and 20 tests.".to_string()); }
     for case in &request.cases {
-        let bytes = serde_json::to_vec(case).map_err(|error| format!("Could not encode example: {error}"))?;
-        if bytes.len() > MAX_JSON_BYTES { return Err("Each example is limited to 64 KB.".to_string()); }
-        if case.id.len() > 200 || case.label.len() > 200 { return Err("Example labels are too long.".to_string()); }
+        let Some(input) = case.input.as_object() else { return Err("Each test must provide named function arguments.".to_string()); };
+        if input.len() != request.parameters.len() || request.parameters.iter().any(|name| !input.contains_key(name)) {
+            return Err("A test's named arguments do not match the function signature.".to_string());
+        }
+        let bytes = serde_json::to_vec(case).map_err(|error| format!("Could not encode test: {error}"))?;
+        if bytes.len() > MAX_JSON_BYTES { return Err("Each test is limited to 64 KB.".to_string()); }
+        if case.id.len() > 200 || case.label.len() > 200 { return Err("Test labels are too long.".to_string()); }
     }
     Ok(())
 }
@@ -262,7 +278,8 @@ fn run_code_blocking(request: RunRequest) -> Result<RunResult, String> {
 
     let language = request.language.as_str();
     let extension = match language { "python" => "py", "javascript" => "js", "typescript" => "ts", "php" => "php", _ => unreachable!() };
-    let cases = serde_json::to_vec(&request.cases).map_err(|error| format!("Could not encode examples: {error}"))?;
+    let test_suite = serde_json::json!({ "parameters": request.parameters, "cases": request.cases });
+    let cases = serde_json::to_vec(&test_suite).map_err(|error| format!("Could not encode tests: {error}"))?;
     let archive = make_tar(&[(format!("main.{extension}"), request.source.as_bytes().to_vec()), ("cases.json".to_string(), cases)])?;
     let run_name = format!("jwsdc-{}-{}", std::process::id(), unique_suffix());
     let mut command = engine_command(&engine);
@@ -289,7 +306,7 @@ fn run_code_blocking(request: RunRequest) -> Result<RunResult, String> {
             let _ = child.kill();
             let _ = child.wait();
             stop_container(&engine, &run_name);
-            return Err(format!("Could not send the example to the runner: {error}"));
+            return Err(format!("Could not send the tests to the runner: {error}"));
         }
     }
 
@@ -315,8 +332,8 @@ fn run_code_blocking(request: RunRequest) -> Result<RunResult, String> {
 
     if timed_out || exceeded_output {
         return Ok(RunResult {
-            status: if timed_out { "timeout" } else { "error" }.to_string(), cases: vec![],
-            stdout: truncate(&stdout_text, 12_000), stderr: truncate(&stderr_text, 4_000), duration_ms,
+            status: if timed_out { "timeout" } else { "runtime_error" }.to_string(), cases: vec![],
+            stderr: truncate(&stderr_text, 4_000), duration_ms,
             message: Some(if timed_out { "Execution exceeded the 4 second time limit.".to_string() } else { "Output exceeded the 128 KB limit.".to_string() }),
         });
     }
@@ -325,15 +342,16 @@ fn run_code_blocking(request: RunRequest) -> Result<RunResult, String> {
     let Some((cases, message)) = parsed else {
         let exit = status.map(|status| status.to_string()).unwrap_or_else(|| "unknown status".to_string());
         return Ok(RunResult {
-            status: "error".to_string(), cases: vec![], stdout: truncate(&stdout_text, 12_000),
+            status: "runtime_error".to_string(), cases: vec![],
             stderr: truncate(&stderr_text, 4_000), duration_ms,
             message: Some(message_for_exit(&exit, &stderr_text)),
         });
     };
     let all_passed = !cases.is_empty() && cases.iter().all(|case| case.passed);
-    let status = if cases.is_empty() { "error" } else if all_passed { "passed" } else { "failed" };
+    let has_runtime_error = cases.is_empty() || message.is_some() || cases.iter().any(|case| case.runtime_error);
+    let status = if has_runtime_error { "runtime_error" } else if all_passed { "success" } else { "incorrect_answer" };
     Ok(RunResult {
-        status: status.to_string(), cases, stdout: truncate(&stdout_text, 12_000), stderr: truncate(&stderr_text, 4_000), duration_ms,
+        status: status.to_string(), cases, stderr: truncate(&stderr_text, 4_000), duration_ms,
         message,
     })
 }
@@ -354,19 +372,25 @@ fn parse_runner_result(stdout: &str) -> Option<(Vec<CaseResult>, Option<String>)
     let value: Value = serde_json::from_str(line).ok()?;
     let message = value.get("message").and_then(Value::as_str).map(|message| truncate(message, 1_000));
     let rows = value.get("cases")?.as_array()?;
-    let cases = rows.iter().map(|row| CaseResult {
-        id: row.get("id").and_then(Value::as_str).unwrap_or_default().to_string(),
-        label: row.get("label").and_then(Value::as_str).unwrap_or("Example").to_string(),
-        passed: row.get("passed").and_then(Value::as_bool).unwrap_or(false),
-        actual_output: row.get("actualOutput").cloned(),
-        error: row.get("error").and_then(Value::as_str).map(|error| truncate(error, 900)),
+    let cases = rows.iter().map(|row| {
+        let hidden = row.get("hidden").and_then(Value::as_bool).unwrap_or(false);
+        let error = row.get("error").and_then(Value::as_str);
+        CaseResult {
+            id: row.get("id").and_then(Value::as_str).unwrap_or_default().to_string(),
+            label: if hidden { "Hidden test".to_string() } else { row.get("label").and_then(Value::as_str).unwrap_or("Example").to_string() },
+            passed: row.get("passed").and_then(Value::as_bool).unwrap_or(false),
+            hidden,
+            runtime_error: error.is_some(),
+            actual_output: if hidden { None } else { row.get("actualOutput").cloned() },
+            error: if hidden { None } else { error.map(|error| truncate(error, 900)) },
+        }
     }).collect();
     Some((cases, message))
 }
 
 fn message_for_exit(exit: &str, stderr: &str) -> String {
     if !stderr.trim().is_empty() { format!("Runner stopped ({exit}): {}", truncate(stderr.trim(), 700)) }
-    else { format!("Runner stopped before returning example results ({exit}). Check for a syntax or runtime error.") }
+    else { format!("Runner stopped before returning test results ({exit}). Check for a syntax or runtime error.") }
 }
 
 fn stop_container(engine: &str, name: &str) {

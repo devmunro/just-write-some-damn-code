@@ -42,7 +42,7 @@
   let submission = '';
   let loadedDraftKey = '';
   let result: RunResult | null = null;
-  let sandbox: SandboxStatus = { engine: null, imageAvailable: false, imageTag: 'jwsdc-runner:1.0.0' };
+  let sandbox: SandboxStatus = { engine: null, imageAvailable: false, imageTag: 'jwsdc-runner:1.1.0' };
   let settings: OllamaSettings = { baseUrl: 'http://localhost:11434', model: '' };
   let feedback: Feedback | null = null;
   let history: PassedExerciseHistoryItem[] = [];
@@ -82,6 +82,8 @@
   $: currentPreferences = preferences[editorLanguage];
   $: currentEditorBehavior = editorBehaviorProfiles[editorLanguage];
   $: isGenerated = Boolean(selectedExercise && 'generatedBy' in selectedExercise);
+  $: visibleResults = result?.cases.filter((item) => !item.hidden) ?? [];
+  $: hiddenResults = result?.cases.filter((item) => item.hidden) ?? [];
 
   onMount(async () => {
     showSidebar = localStorage.getItem('practice-sidebar-visible') !== 'false';
@@ -199,14 +201,20 @@
     finally { isSettingUp = false; stopRunnerTimer(); }
   }
 
-  async function runExamples() {
+  async function runTests() {
     if (!selectedExercise) return;
     error = ''; notice = ''; result = null; isRunning = true; startRunnerTimer();
     try {
       if (!isTauriRuntime()) throw new Error('Run is available in the desktop app after setting up its local container runner. You can still write and save code here.');
-      const request: RunRequest = { exerciseId: selectedExercise.id, language: editorLanguage, source: submission, cases: selectedExercise.examples };
+      const request: RunRequest = {
+        exerciseId: selectedExercise.id,
+        language: editorLanguage,
+        source: submission,
+        parameters: selectedExercise.parameters,
+        cases: [...selectedExercise.examples, ...selectedExercise.hiddenCases].map((item) => ({ ...item, hidden: Boolean(item.hidden) }))
+      };
       result = await invoke<RunResult>('run_code', { request });
-      if (result.status === 'passed') {
+      if (result.status === 'success') {
         try {
           await recordExercisePassed({ exerciseId: selectedExercise.id, title: selectedExercise.title, language: editorLanguage });
           history = await listPassedExercises();
@@ -256,11 +264,10 @@
     showHistory = true;
   }
 
-  function pretty(value: unknown): string { return JSON.stringify(value, null, 2); }
   function formatExampleValue(value: JsonValue): string {
     if (Array.isArray(value)) return `[${value.map(formatExampleValue).join(', ')}]`;
     if (value !== null && typeof value === 'object') {
-      return `{${Object.entries(value).map(([key, item]) => `${JSON.stringify(key)}: ${formatExampleValue(item)}`).join(', ')}}`;
+      return `{${Object.entries(value).map(([key, item]) => `${/^[A-Za-z_$][\w$]*$/.test(key) ? key : JSON.stringify(key)}: ${formatExampleValue(item)}`).join(', ')}}`;
     }
     return JSON.stringify(value) ?? 'null';
   }
@@ -299,7 +306,7 @@
   function handleGlobalKeydown(event: KeyboardEvent) {
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
       event.preventDefault();
-      void runExamples();
+      void runTests();
     }
   }
 </script>
@@ -397,7 +404,7 @@
               <p>Saved separately for {editorLanguages.find((item) => item.value === editorLanguage)?.label}. {currentEditorBehavior.syntaxNote} Suggestions stay off.</p>
               <div class="shortcut-list" aria-label="Code space shortcuts">
                 <div class="shortcut-heading">CODE SPACE SHORTCUTS</div>
-                <div class="shortcut-row"><kbd>Ctrl + Enter</kbd><span>Run examples</span></div>
+                <div class="shortcut-row"><kbd>Ctrl + Enter</kbd><span>Run tests</span></div>
                 <div class="shortcut-row"><kbd>Ctrl + scroll</kbd><span>Zoom code text</span></div>
                 <div class="shortcut-row"><kbd>Ctrl + F</kbd><span>Find in code</span></div>
                 <div class="shortcut-row"><kbd>Ctrl + Z</kbd><span>Undo</span></div>
@@ -421,22 +428,22 @@
         <div class="runner-header"><div class="runner-title"><Terminal size={16} /><strong>Run code</strong></div>
           {#if isRunning || isSettingUp}<div class="runner-status" role="status" aria-live="polite"><Loader2 class="spin" size={13} /><span>{isSettingUp ? 'Building the local runner image' : 'Running your code in an isolated container'}</span><span class="runner-elapsed">{runnerElapsedSeconds}s</span></div>{/if}
         </div>
-        {#if isRunning || isSettingUp}<div class="runner-progress" role="progressbar" aria-label={isSettingUp ? 'Building local runner image' : 'Running examples'} aria-valuetext="In progress"><span></span></div>{/if}
+        {#if isRunning || isSettingUp}<div class="runner-progress" role="progressbar" aria-label={isSettingUp ? 'Building local runner image' : 'Running tests'} aria-valuetext="In progress"><span></span></div>{/if}
         {#if result}
-          <div class="run-result" class:result-pass={result.status === 'passed'} class:result-fail={result.status !== 'passed'}>
-            <div class="result-summary"><span class="result-symbol">{#if result.status === 'passed'}<CheckCircle2 size={16} />{:else}<X size={16} />{/if}</span><strong>{result.status === 'passed' ? 'Examples passed' : result.status === 'timeout' ? 'Run timed out' : result.status === 'error' ? 'Run error' : 'Some examples failed'}</strong><span>{result.cases.filter((item) => item.passed).length} of {result.cases.length} examples passed</span><span class="result-duration">{result.durationMs} ms</span><button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button></div>
+          <div class="run-result" class:result-pass={result.status === 'success'} class:result-fail={result.status !== 'success'}>
+            <div class="result-summary"><span class="result-symbol">{#if result.status === 'success'}<CheckCircle2 size={16} />{:else}<X size={16} />{/if}</span><strong>{result.status === 'success' ? 'Success' : result.status === 'incorrect_answer' ? 'Incorrect answer' : result.status === 'timeout' ? 'Time limit exceeded' : 'Runtime error'}</strong>{#if result.cases.length}<span>{visibleResults.filter((item) => item.passed).length}/{visibleResults.length} visible</span><span>{hiddenResults.filter((item) => item.passed).length}/{hiddenResults.length} hidden</span>{:else}<span>No tests completed</span>{/if}<span class="result-duration">{result.durationMs} ms</span><button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runTests}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run tests'}</span><kbd>Ctrl + Enter</kbd></button></div>
             {#if result.message}<p class="result-message">{result.message}</p>{/if}
-            {#if result.cases.length}<div class="case-results">{#each result.cases as item}<div class="case-result"><span class:case-pass={item.passed} class:case-fail={!item.passed}>{#if item.passed}<Check size={12} />{:else}<X size={12} />{/if}</span><span>{item.label}</span>{#if item.error}<code>{item.error}</code>{:else if !item.passed}<span class="case-actual">Got {pretty(item.actualOutput)}</span>{/if}</div>{/each}</div>{/if}
+            {#if visibleResults.length || hiddenResults.length}<div class="case-results">{#each visibleResults as item}<div class="case-result"><span class:case-pass={item.passed} class:case-fail={!item.passed}>{#if item.passed}<Check size={12} />{:else}<X size={12} />{/if}</span><span>{item.label}</span>{#if item.error}<code>{item.error}</code>{:else if !item.passed}<span class="case-actual">Got {formatExampleValue(item.actualOutput ?? null)}</span>{/if}</div>{/each}{#if hiddenResults.length}<div class="case-result hidden-test-summary"><span class:case-pass={hiddenResults.every((item) => item.passed)} class:case-fail={!hiddenResults.every((item) => item.passed)}>{#if hiddenResults.every((item) => item.passed)}<Check size={12} />{:else}<X size={12} />{/if}</span><span>Hidden tests</span><span>{hiddenResults.filter((item) => item.passed).length} of {hiddenResults.length} passed</span></div>{/if}</div>{/if}
             {#if result.stderr}<pre class="runner-stderr">{result.stderr}</pre>{/if}
           </div>
         {:else if !sandbox.imageAvailable}
           <div class="runner-not-ready"><div class="runner-not-ready-icon"><Container size={20} /></div><div class="runner-not-ready-copy"><div class="runner-not-ready-heading"><strong>{sandbox.engine ? 'One-time setup' : 'No container engine found'}</strong><div class="runner-actions">
             {#if sandbox.engine}<button class="setup-button" disabled={isSettingUp} on:click={setupSandbox}>{#if isSettingUp}<Loader2 class="spin" size={14} />{:else}<span class="download-glyph">↓</span>{/if}{isSettingUp ? 'Setting up' : 'Set up runner'}</button>{/if}
-            <button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button>
-          </div></div><p>{#if sandbox.engine}Build the local runner image. Network access is needed once.{:else}Install <a href="https://podman.io/docs/installation" target="_blank" rel="noreferrer">Podman</a> or <a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noreferrer">Docker</a> to run examples.{/if}</p></div>
+            <button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runTests}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run tests'}</span><kbd>Ctrl + Enter</kbd></button>
+          </div></div><p>{#if sandbox.engine}Build the local runner image. Network access is needed once.{:else}Install <a href="https://podman.io/docs/installation" target="_blank" rel="noreferrer">Podman</a> or <a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noreferrer">Docker</a> to run tests.{/if}</p></div>
           </div>
         {:else}
-          <div class="runner-empty"><Circle size={13} /><span>Run your code against the public examples. No network access inside the runner.</span><button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runExamples}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run examples'}</span><kbd>Ctrl + Enter</kbd></button></div>
+          <div class="runner-empty"><Circle size={13} /><span>Run your function against visible examples and hidden tests. No network access inside the runner.</span><button class="run-button" disabled={!sandbox.imageAvailable || isRunning || !submission.trim()} on:click={runTests}>{#if isRunning}<Loader2 class="spin" size={15} />{:else}<Play size={15} fill="currentColor" />{/if}<span>{isRunning ? 'Running…' : 'Run tests'}</span><kbd>Ctrl + Enter</kbd></button></div>
         {/if}
       </div>
     </section>
@@ -449,9 +456,9 @@
     <div class="details-dialog-body">
       <div class="details-meta"><span>{selectedExercise.topic}</span><span class="details-meta-divider"></span><span class="details-difficulty">{displayDifficulty(selectedExercise.difficulty)}</span><span class="details-meta-divider"></span><span>{selectedExercise.estimatedMinutes} MIN</span>{#if isGenerated}<span class="ai-generated-badge"><Sparkles size={11} /> AI generated</span>{/if}</div>
       <section class="prompt-panel" aria-labelledby="prompt-heading"><h3 id="prompt-heading">THE CHALLENGE</h3><p>{selectedExercise.prompt}</p></section>
-      <div class="contract-card"><div class="contract-heading"><Code2 size={14} /><span>WHAT TO WRITE</span></div><code>solve(input) → JSON</code><p>Write the function yourself. The runner passes each example as a JSON value.</p></div>
+      <div class="contract-card"><div class="contract-heading"><Code2 size={14} /><span>FUNCTION SIGNATURE</span></div><code>solve({selectedExercise.parameters.join(', ')})</code><p>Write this function. Each argument is passed directly in the order shown; return the requested result.</p></div>
       <section class="detail-section constraints-section"><h3><ListFilter size={14} /> CONSTRAINTS</h3><ul>{#each selectedExercise.constraints as constraint}<li>{constraint}</li>{/each}</ul></section>
-      <section class="detail-section examples-section"><div class="section-header"><h3><BookOpen size={14} /> EXAMPLES</h3><span>{selectedExercise.examples.length} examples</span></div>
+      <section class="detail-section examples-section"><div class="section-header"><h3><BookOpen size={14} /> EXAMPLES</h3><span>{selectedExercise.examples.length} visible · {selectedExercise.hiddenCases.length} hidden tests</span></div>
         {#each selectedExercise.examples as example}
           <div class="example-card"><div class="example-label">{example.label}</div><div class="example-io"><div class="example-line"><span>Input:</span><pre>{formatExampleInput(example.input)}</pre></div><div class="example-line"><span>Output:</span><pre>{formatExampleValue(example.expectedOutput)}</pre></div></div></div>
         {/each}

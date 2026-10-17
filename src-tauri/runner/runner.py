@@ -42,7 +42,9 @@ def canonical(value):
 def main():
     started = time.monotonic()
     with open('/workspace/cases.json', encoding='utf-8') as handle:
-        cases = json.load(handle)
+        suite = json.load(handle)
+    parameters = suite['parameters']
+    cases = suite['cases']
     with open('/workspace/main.py', encoding='utf-8') as handle:
         source = handle.read()
 
@@ -55,7 +57,7 @@ def main():
             raise RuntimeError('Output exceeded the 128 KB limit.')
         solve = namespace.get('solve')
         if not callable(solve):
-            raise TypeError('Define solve(input) in your file.')
+            raise TypeError(f'Define solve({", ".join(parameters)}) in your file.')
     except BaseException as error:
         OUTPUT.write('__JWS_RESULT__' + json.dumps({'cases': [], 'message': f'{type(error).__name__}: {error}'[:500]}) + '\n')
         return 1
@@ -66,15 +68,15 @@ def main():
         started_case = time.monotonic()
         try:
             with contextlib.redirect_stdout(captured_out), contextlib.redirect_stderr(captured_err):
-                actual = solve(case['input'])
+                actual = solve(*(case['input'][name] for name in parameters))
             if captured_out.overflow or captured_err.overflow:
                 raise RuntimeError('Output exceeded the 128 KB limit.')
             encoded = json.dumps(actual, ensure_ascii=False, allow_nan=False, separators=(',', ':'))
             actual = json.loads(encoded)
             passed = canonical(actual) == canonical(case['expectedOutput'])
-            row = {'id': case['id'], 'label': case['label'], 'passed': passed, 'actualOutput': actual}
+            row = {'id': case['id'], 'label': case['label'], 'hidden': case.get('hidden', False), 'passed': passed, 'actualOutput': actual}
         except BaseException as error:
-            row = {'id': case['id'], 'label': case['label'], 'passed': False, 'error': f'{type(error).__name__}: {error}'[:500]}
+            row = {'id': case['id'], 'label': case['label'], 'hidden': case.get('hidden', False), 'passed': False, 'error': f'{type(error).__name__}: {error}'[:500]}
         row['durationMs'] = round((time.monotonic() - started_case) * 1000)
         results.append(row)
 

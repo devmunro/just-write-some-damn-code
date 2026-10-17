@@ -27,7 +27,7 @@ Choose a task, write your own code, and run it against public examples. The edit
 
 ![The practice workspace: challenge list, code editor, language controls, and local runner](docs/screenshots/practice-workspace.png)
 
-<p align="center"><img src="docs/screenshots/challenge-details.png" width="720" alt="Challenge details with a clear prompt, solve input contract, constraints, and JSON examples" /></p>
+<p align="center"><img src="docs/screenshots/challenge-details.png" width="720" alt="Challenge details with a clear prompt, function signature, constraints, and named argument examples" /></p>
 
 ## What you can practice
 
@@ -37,7 +37,7 @@ Choose a task, write your own code, and run it against public examples. The edit
 
 - **A steady difficulty curve:** 75 Easy, 125 Medium, and 50 Hard DSA exercises. Build tasks also include all three levels.
 - **Useful patterns:** arrays and hashing, two pointers, sliding windows, binary search, stacks and queues, linked lists, trees and tries, heaps, graphs, backtracking, dynamic programming, greedy methods, intervals, bit manipulation, and math and geometry.
-- **A small, consistent run format:** implement `solve(input)` and return JSON. Each task includes public input and expected-output examples.
+- **A familiar function flow:** implement `solve(values, target)` using the named arguments shown in each example. The runner passes arguments directly and checks both visible examples and hidden tests.
 - **An editor that leaves the thinking to you:** Monaco syntax highlighting, with suggestions and inline completions disabled. Indentation and bracket or quote closing can be set per language.
 - **Local progress:** drafts are saved per exercise and language. History remembers passed exercises without storing or displaying solutions. There are no accounts or cloud sync.
 

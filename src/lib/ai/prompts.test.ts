@@ -14,7 +14,7 @@ describe('local AI contracts', () => {
   });
 
   it('keeps review qualitative and forbids scores or solutions', () => {
-    const prompt = buildExerciseFeedbackPrompt(exercise, 'function solve(input) { return input; }').map((message) => message.content).join('\n');
+    const prompt = buildExerciseFeedbackPrompt(exercise, 'function solve(values) { return values; }').map((message) => message.content).join('\n');
     expect(prompt).toContain('Do not assign a numerical score or grade');
     expect(prompt).toContain('Never write a solution');
   });
@@ -25,16 +25,23 @@ describe('local AI contracts', () => {
       examples: [
         { label: 'Example 1', input: { values: [1, 1] }, expectedOutput: [1] },
         { label: 'Example 2', input: { values: [] }, expectedOutput: [] }
-      ]
+      ],
+      hiddenCases: [{ input: { values: [3, 3, 2] }, expectedOutput: [3, 2] }]
     }, exercise);
     expect(variant.generatedBy).toBe('ollama');
     expect(variant.sourceExerciseId).toBe(exercise.id);
     expect(variant.examples).toHaveLength(2);
+    expect(variant.hiddenCases).toHaveLength(1);
+    expect(variant.prompt).not.toMatch(/JSON|input object|stdin/i);
   });
 
   it('rejects generated solution fields and malformed examples', () => {
     expect(() => normalizeGeneratedVariant({ solution: 'secret', title: 'x' }, exercise)).toThrow(/solution material/i);
     expect(() => normalizeGeneratedVariant({ title: 'x', prompt: 'x', tags: ['a'], constraints: ['b'], examples: [{ input: {}, expectedOutput: {} }] }, exercise)).toThrow(/two or three examples/i);
+  });
+
+  it('rejects variants that expose the internal input-object format in the prompt', () => {
+    expect(() => normalizeGeneratedVariant({ title: 'Bad format', prompt: 'Parse the JSON input object.', tags: ['arrays'], constraints: ['Use arrays.'], examples: [], hiddenCases: [] }, exercise)).toThrow(/runner format/i);
   });
 
   it('accepts only loopback Ollama endpoints', () => {

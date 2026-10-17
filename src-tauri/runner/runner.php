@@ -21,11 +21,13 @@ function emit_result($output, $data) {
 }
 
 try {
-    $cases = json_decode(file_get_contents('/workspace/cases.json'), false, 512, JSON_THROW_ON_ERROR);
+    $suite = json_decode(file_get_contents('/workspace/cases.json'), false, 512, JSON_THROW_ON_ERROR);
+    $parameters = $suite->parameters;
+    $cases = $suite->cases;
     ob_start(null, 8192);
     require '/workspace/main.php';
     ob_end_clean();
-    if (!function_exists('solve')) throw new RuntimeException('Define solve($input) in your file.');
+    if (!function_exists('solve')) throw new RuntimeException('Define solve(' . implode(', ', $parameters) . ') in your file.');
 } catch (Throwable $error) {
     if (ob_get_level() > 0) ob_end_clean();
     emit_result($output, ['cases' => [], 'message' => get_class($error) . ': ' . substr($error->getMessage(), 0, 500)]);
@@ -37,18 +39,19 @@ foreach ($cases as $case) {
     $caseStarted = microtime(true);
     try {
         ob_start(null, 8192);
-        $actual = solve($case->input);
+        $arguments = array_map(fn($name) => $case->input->{$name}, $parameters);
+        $actual = solve(...$arguments);
         ob_end_clean();
         $encoded = json_encode($actual, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
         $actualJson = json_decode($encoded, false, 512, JSON_THROW_ON_ERROR);
         $expected = $case->expectedOutput;
         $passed = json_encode(canonical_value($actualJson), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ===
             json_encode(canonical_value($expected), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $results[] = ['id' => $case->id, 'label' => $case->label, 'passed' => $passed, 'actualOutput' => $actualJson,
+        $results[] = ['id' => $case->id, 'label' => $case->label, 'hidden' => (bool) ($case->hidden ?? false), 'passed' => $passed, 'actualOutput' => $actualJson,
             'durationMs' => (int) round((microtime(true) - $caseStarted) * 1000)];
     } catch (Throwable $error) {
         if (ob_get_level() > 0) ob_end_clean();
-        $results[] = ['id' => $case->id, 'label' => $case->label, 'passed' => false,
+        $results[] = ['id' => $case->id, 'label' => $case->label, 'hidden' => (bool) ($case->hidden ?? false), 'passed' => false,
             'error' => get_class($error) . ': ' . substr($error->getMessage(), 0, 500),
             'durationMs' => (int) round((microtime(true) - $caseStarted) * 1000)];
     }

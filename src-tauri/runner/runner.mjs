@@ -17,7 +17,8 @@ function errorText(error) {
 
 async function main() {
   const language = process.argv[2];
-  const cases = JSON.parse(fs.readFileSync('/workspace/cases.json', 'utf8'));
+  const suite = JSON.parse(fs.readFileSync('/workspace/cases.json', 'utf8'));
+  const { parameters, cases } = suite;
   let source = fs.readFileSync(`/workspace/main.${language === 'typescript' ? 'ts' : 'js'}`, 'utf8');
   if (language === 'typescript') {
     source = ts.transpile(source, { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, strict: true });
@@ -26,20 +27,20 @@ async function main() {
   const module = { exports: {} };
   const loadSolve = new Function('require', 'module', 'exports', `${source}\n;return typeof solve === 'function' ? solve : module.exports.solve;`);
   const solve = loadSolve(createRequire(import.meta.url), module, module.exports);
-  if (typeof solve !== 'function') throw new TypeError('Define solve(input) in your file.');
+  if (typeof solve !== 'function') throw new TypeError(`Define solve(${parameters.join(', ')}) in your file.`);
 
   const results = [];
   for (const test of cases) {
     const caseStarted = Date.now();
     try {
-      const actual = await solve(test.input);
+      const actual = await solve(...parameters.map((name) => test.input[name]));
       const encoded = JSON.stringify(actual);
-      if (encoded === undefined) throw new TypeError('solve(input) must return a JSON value.');
+      if (encoded === undefined) throw new TypeError('solve must return a value.');
       const jsonValue = JSON.parse(encoded);
       const passed = JSON.stringify(canonical(jsonValue)) === JSON.stringify(canonical(test.expectedOutput));
-      results.push({ id: test.id, label: test.label, passed, actualOutput: jsonValue, durationMs: Date.now() - caseStarted });
+      results.push({ id: test.id, label: test.label, hidden: Boolean(test.hidden), passed, actualOutput: jsonValue, durationMs: Date.now() - caseStarted });
     } catch (error) {
-      results.push({ id: test.id, label: test.label, passed: false, error: errorText(error), durationMs: Date.now() - caseStarted });
+      results.push({ id: test.id, label: test.label, hidden: Boolean(test.hidden), passed: false, error: errorText(error), durationMs: Date.now() - caseStarted });
     }
   }
 
