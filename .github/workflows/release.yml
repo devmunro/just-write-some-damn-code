@@ -111,19 +111,23 @@ jobs:
           GITHUB_RELEASE_REPOSITORY: ${{ github.repository }}
           GITHUB_RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          shopt -s globstar nullglob
-          installers=(src-tauri/target/release/bundle/**/*.exe src-tauri/target/release/bundle/**/*.dmg)
-          if ((${#installers[@]} == 0)); then
-            echo "No installer was produced."
-            exit 1
-          fi
-
           manifest="SHA256SUMS-${ASSET_PLATFORM}.txt"
-          node - "$manifest" "${installers[@]}" <<'NODE'
+          node - "$manifest" <<'NODE'
           const { createHash } = require('node:crypto');
-          const { readFileSync, writeFileSync } = require('node:fs');
-          const { basename } = require('node:path');
-          const [manifest, ...files] = process.argv.slice(2);
+          const { readdirSync, readFileSync, writeFileSync } = require('node:fs');
+          const { basename, extname, join } = require('node:path');
+          const [manifest] = process.argv.slice(2);
+          const bundleRoot = 'src-tauri/target/release/bundle';
+          const files = [];
+          function collect(directory) {
+            for (const entry of readdirSync(directory, { withFileTypes: true })) {
+              const file = join(directory, entry.name);
+              if (entry.isDirectory()) collect(file);
+              else if (['.exe', '.dmg'].includes(extname(entry.name).toLowerCase())) files.push(file);
+            }
+          }
+          collect(bundleRoot);
+          if (files.length === 0) throw new Error('No installer was produced.');
           const entries = files.map((file) => {
             const digest = createHash('sha256').update(readFileSync(file)).digest('hex');
             return `${digest}  ${basename(file)}`;
